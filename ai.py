@@ -1,0 +1,313 @@
+import pygame
+import math
+import random
+import numpy as np
+from pygame.locals import *
+
+class Neuron():
+    def __init__(self, window, pos, colours):
+        self.window = window
+        self.pos = [int(pos[0]), int(pos[1])]
+        self.colours = colours
+        self.display_biases = False
+
+    def render(self):
+        pygame.draw.circle(self.window, self.colours["grey"], self.pos, 12)
+        if self.display_biases:
+            pygame.draw.circle(self.window, self.bias_colour, self.pos, 10)
+        else:
+            pygame.draw.circle(self.window, self.colour, self.pos, 10)
+
+    def get_pos(self):
+        return self.pos
+
+    def set_display_biases(self, display):
+        self.display_biases = display
+
+    def set_activation(self, activation):
+        self.activation = activation
+        self.colour = (255 * activation, 255 * activation, 255 * activation)
+
+
+class Input_Neuron(Neuron):
+    def __init__(self, window, pos, colours):
+        super().__init__(window, pos, colours)
+
+        self.colour = colours["white"]
+        self.bias_colour = (0, 0, 0)
+
+
+class Hidden_Neuron(Neuron):
+    def __init__(self, window, pos, colours, bias):
+        super().__init__(window, pos, colours)
+
+        self.colour = colours["white"]
+        self.bias = bias
+        if abs(self.bias) > 10:
+            colour = 1
+        else:
+            colour = abs(self.bias) / 10
+        if self.bias >= 0:
+            self.bias_colour = (0, 0, 255*colour)
+        else:
+            self.bias_colour = (255*colour, 0, 0)
+
+
+class Output_Neuron(Neuron):
+    def __init__(self, window, pos, colours, bias):
+        super().__init__(window, pos, colours)
+
+        self.colour = colours["white"]
+        self.bias = bias
+        if abs(self.bias) > 10:
+            colour = 1
+        else:
+            colour = abs(self.bias) / 10
+        if self.bias >= 0:
+            self.bias_colour = (0, 0, 255*colour)
+        else:
+            self.bias_colour = (255*colour, 0, 0)
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+class Axon():
+    def __init__(self, window, start, end, colours, weight):
+        self.window = window
+        self.start = start
+        self.end = end
+        self.colours = colours
+        self.weight = weight
+
+        if abs(self.weight) > 1.7:
+            colour = 1
+        else:
+            colour = abs(self.weight) / 1.7
+        if self.weight >= 0:
+            self.colour = (0, 0, 255*colour)
+        else:
+            self.colour = (255*colour, 0, 0)
+
+    def render(self):
+        pygame.draw.line(self.window, self.colour, self.start, self.end, 1)
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+class Neural_Network():
+    def __init__(self, window, colours, resolution, inputs, hidden, outputs):
+        self.window = window
+        self.inputs = []
+        self.hidden = []
+        self.axons = []
+        self.weights = []
+        self.biases = []
+        mean = 0
+        std_dev = 1
+        self.layers = len(hidden) + 1
+
+        #Initiate input nodes
+        start = [resolution[0]/5, resolution[1]/5]
+        incriment = resolution[1] * 3 / 5 / (inputs-1)
+        for node in range(inputs):
+            self.inputs.append(Input_Neuron(window, [start[0], start[1] + incriment * node], colours))
+
+
+        #---INITIATE HIDDEN LAYER BIASES AND NODES---
+        
+        #Initiate weights leading to hidden layers
+        start = [resolution[0]/5, resolution[1]/8]
+        for layer in range(len(hidden)):
+            
+            #Node position incriment
+            incriment = [resolution[0]*3/5/(len(hidden)+1), resolution[1] * 3 / 4 / (hidden[layer]-1)]
+
+            #Setup biases matrix using first element
+            pos = [start[0] + incriment[0] * (layer+1), start[1]]
+            bias = np.random.normal(mean, std_dev)
+            nodes = [Hidden_Neuron(window, pos, colours, bias)]
+            temp_3 = np.array([bias])
+
+            #Append all other biases to the matrix
+            for i in range(1, hidden[layer]):
+                pos = [start[0] + incriment[0] * (layer+1), start[1] + incriment[1] * i]
+                bias = np.random.normal(mean, std_dev)
+                nodes.append(Hidden_Neuron(window, pos, colours, bias))
+                temp_3 = np.append(temp_3, bias)
+
+            self.hidden.append(nodes)
+            self.biases.append(temp_3)
+
+            #---INITATE HIDDEN LAYER WEIGHTS AND AXONS
+
+            #Setup weights matrix using first weights of array
+            temp_2 = []
+            pos = [start[0] + incriment[0] * (layer+1), start[1]]
+            if layer == 0:
+                for j in range(inputs):
+                    weight = np.random.normal(mean, std_dev)
+                    self.axons.append(Axon(window, pos, self.inputs[j].get_pos(), colours, weight))
+                    temp_2.append(weight)
+            else:
+                for j in range(hidden[layer-1]):
+                    weight = np.random.normal(mean, std_dev)
+                    self.axons.append(Axon(window, pos, self.hidden[layer-1][j].get_pos(), colours, weight))
+                    temp_2.append(weight)
+            temp_1 = np.array([temp_2])
+
+            #Append all other weights to the martix
+            for i in range(1, hidden[layer]):
+                temp_2 = []
+
+                pos = [start[0] + incriment[0] * (layer+1), start[1] + incriment[1] * i]
+                if layer == 0:
+                    for j in range(inputs):
+                        weight = np.random.normal(mean, std_dev)
+                        self.axons.append(Axon(window, pos, self.inputs[j].get_pos(), colours, weight))
+                        temp_2.append(weight)
+                else:
+                    for j in range(hidden[layer-1]):
+                        weight = np.random.normal(mean, std_dev)
+                        self.axons.append(Axon(window, pos, self.hidden[layer-1][j].get_pos(), colours, weight))
+                        temp_2.append(weight)
+
+                temp_1 = np.append(temp_1, [temp_2], axis=0)
+                    
+
+            self.weights.append(temp_1)
+
+
+
+        #---INITIATE OUTPUT BIASES AND NODES---
+
+        #Set output node positioning variables
+        start = [resolution[0] - resolution[0]/5, resolution[1]/5]
+        incriment = resolution[1] * 3 / 5 / (outputs-1)
+
+        #Setup biases matrix using first element
+        pos = start
+        bias = np.random.normal(mean, std_dev)
+        self.outputs = [Output_Neuron(window, pos, colours, bias)]
+        temp_3 = np.array([bias])
+
+        #Append all other biases to the matrix
+        for i in range(1, outputs):
+            pos = [start[0], start[1] + incriment * i]
+            bias = np.random.normal(mean, std_dev)
+            self.outputs.append(Output_Neuron(window, pos, colours, bias))
+            temp_3 = np.append(temp_3, bias)
+        self.biases.append(temp_3)
+
+
+        #---INITIATE OUTPUT WEIGHTS AND AXONS---
+
+        #Setup weights matrix using first weights of array
+        temp_2 = []
+        for j in range(hidden[len(hidden)-1]):
+            weight = np.random.normal(mean, std_dev)
+            self.axons.append(Axon(window, start, self.hidden[len(hidden)-1][j].get_pos(), colours, weight))
+            temp_2.append(np.random.normal(mean, std_dev))
+        temp_1 = np.array([temp_2])
+
+        #Append all other weights to the matrix
+        for i in range(1, outputs):
+            temp_2 = []
+
+            pos = [start[0], start[1] + incriment * i]
+            for j in range(hidden[len(hidden)-1]):
+                weight = np.random.normal(mean, std_dev)
+                self.axons.append(Axon(window, pos, self.hidden[len(hidden)-1][j].get_pos(), colours, weight))
+                temp_2.append(np.random.normal(mean, std_dev))
+
+            temp_1 = np.append(temp_1, [temp_2], axis=0)
+
+        self.weights.append(temp_1)
+
+
+    def render(self):
+        #Render axons
+        for axon in self.axons:
+            axon.render()
+            
+        #Render input nodes
+        for node in self.inputs:
+            node.render()
+
+        #Render hidden nodes
+        for layer in self.hidden:
+            for node in layer:
+                node.render()
+
+        #Render output nodes
+        for node in self.outputs:
+            node.render()
+
+
+    def process(self, layer_data, set_activations=False):
+        layer_data = np.array(layer_data)
+        activations = [layer_data]
+                
+        for layer in range(self.layers):
+            
+            layer_data = 1/(1+np.exp(-(np.matmul(self.weights[layer], layer_data) + self.biases[layer])))
+            activations.append(layer_data)
+
+        if set_activations:
+            self.set_activations(activations)
+            
+        return layer_data
+
+
+    def set_display_biases(self, display):
+        for node in self.inputs:
+            node.set_display_biases(display)
+
+        for layer in self.hidden:
+            for node in layer:
+                node.set_display_biases(display)
+
+        for node in self.outputs:
+            node.set_display_biases(display)
+
+
+    def set_activations(self, activations):
+        for node in range(len(self.inputs)):
+            self.inputs[node].set_activation(activations[0][node])
+
+        for layer in range(len(self.hidden)):
+            for node in range(len(self.hidden[layer])):
+                self.hidden[layer][node].set_activation(activations[layer+1][node])
+
+        for node in range(len(self.outputs)):
+            self.outputs[node].set_activation(activations[len(activations)-1][node])
+
+
+    def set_weights(self, weights):
+        for layer in range(len(weights)):
+            for node in range(len(weights[layer])):
+                for w in range(len(weights[layer][node])):
+                    weights[layer][node][w] = np.random.normal(weights[layer][node][w], 0.05)
+
+        self.weights = weights
+        
+
+    def set_biases(self, biases):
+        for layer in range(len(biases)):
+            for bias in range(len(biases[layer])):
+                biases[layer][bias] = np.random.normal(biases[layer][bias], 0.05)
+
+        self.biases = biases
+        
+
+    def get_weights(self):
+        return self.weights
+    
+
+    def get_biases(self):
+        return self.biases        
+        
+        
+#----------------------------------------------------------------------------------------------------------------------------------
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()
