@@ -322,7 +322,7 @@ class Car():
 
         #Stopping condition is that the inctiment is less than 1 pixel
         if incriment_length > 1:
-            if start_pos[0] < 1920 and start_pos[0] >= 0 and start_pos[1] < 1080 and start_pos[1] >= 0: 
+            if start_pos[0] < self.window.get_size()[0] and start_pos[0] >= 0 and start_pos[1] < self.window.get_size()[1] and start_pos[1] >= 0: 
                 colour = self.window.get_at([int(start_pos[0]), int(start_pos[1])])[0]
             else:
                 colour = 0

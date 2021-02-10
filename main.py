@@ -232,7 +232,7 @@ def main():
                "black" : [0,0,0]}
 
     clock = pygame.time.Clock()
-    resolution = [1920, 1080]
+    resolution = [1280, 720]
     pygame.init()
     window = pygame.display.set_mode((resolution[0], resolution[1]))
     pygame.display.set_caption('Physics')
