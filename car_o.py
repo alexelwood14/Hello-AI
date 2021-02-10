@@ -1,3 +1,4 @@
+import const
 import pygame
 import math
 import map_o
@@ -56,7 +57,7 @@ class Car():
         self.speed = 0.0
         self.vel = np.array([0.0,0.0])
         self.acc = 0.0
-        self.term_speed = 300
+        self.term_speed = 300*window.get_size()[1]/const.BASE_RES 
 
         self.ang = math.pi * 3 / 2
         self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
@@ -393,7 +394,8 @@ class Car():
         return self.ai.get_weights()
 
     def reset(self):
-        self.pos = np.array([300, 300])
+        asp_ratio = self.window.get_size() / const.BASE_RES
+        self.pos = asp_ratio * np.array([300, 300])
         self.speed = 0.0
         self.vel = np.array([0.0,0.0])
         self.acc = 0.0

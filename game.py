@@ -1,3 +1,4 @@
+import const
 import pygame
 import math
 import numpy as np
@@ -93,11 +94,15 @@ def race(window, clock, colours, resolution, action, mouse_used):
     gen = 0
     cars = [] 
 
-    track_1 = map_o.Map(window, colours["light_grey"], [np.array([300, 300]), np.array([1620, 300]),
-                                                        np.array([1620, 800]), np.array([300, 800])], 100)
+    asp_ratio = window.get_size()[1] / const.BASE_RES
+
+    track_points = [asp_ratio*np.array([300, 300]), asp_ratio*np.array([1620, 300]),
+                    asp_ratio*np.array([1620, 800]), asp_ratio*np.array([300, 800])]
+
+    track_1 = map_o.Map(window, colours["light_grey"], track_points, 100)
 
     for car in range(50):
-        cars.append(car_o.Car(window, resolution, colours, [300, 300], 10))
+        cars.append(car_o.Car(window, resolution, colours, [asp_ratio*300, asp_ratio*300], 10))
 
     while action == "race":
         window.fill(colours["black"])
