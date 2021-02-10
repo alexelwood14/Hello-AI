@@ -31,14 +31,20 @@ def find_top_car(cars):
             index = car
 
     return highest, index
-    
 
-def next_gen_cars(top_cars, window, pos, size, cars):
+
+def next_gen_cars(top_cars, window, cars):
+    cars = []
+    asp_ratio = window.get_size()[1] / const.BASE_RES
+    for i in range(50):
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
+
     for car in range(len(top_cars)):
         for i in range(10):
             cars[(car * 10) + i].set_biases(top_cars[car].get_biases())
             cars[(car * 10) + i].set_weights(top_cars[car].get_weights())
-            cars[(car * 10) + i].reset()
+
+    return cars
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
@@ -130,8 +136,7 @@ def race(window, clock, action, mouse_used):
 ##            average_progress /= len(cars)
             
             top_cars = find_top_cars(cars)
-
-            next_gen_cars(top_cars, window, [asp_ratio*300, asp_ratio*300], 10, cars)
+            cars = next_gen_cars(top_cars, window, cars)
 
             gen += 1
             simulating = True
