@@ -47,12 +47,12 @@ def find_top_car(cars):
     return highest_car
 
 
-def next_cars(highest_car, window, resolution, pos, size, cars):
+def next_cars(highest_car, window, pos, size, cars):
 ##    cars = []
     top_cars = [highest_car]
 ##    for car in top_cars:
 ##        for i in range(50):
-##            cars.append(car_o.Car(window, resolution, pos, size))
+##            cars.append(car_o.Car(window, pos, size))
 
     for car in range(len(top_cars)):
         for i in range(50):
@@ -62,11 +62,11 @@ def next_cars(highest_car, window, resolution, pos, size, cars):
 ##    return cars
 
 
-def next_gen_cars(top_cars, window, resolution, pos, size, cars):
+def next_gen_cars(top_cars, window, pos, size, cars):
 ##    cars = []
 ##    for car in top_cars:
 ##        for i in range(10):
-##            cars.append(car_o.Car(window, resolution, pos, size))
+##            cars.append(car_o.Car(window, pos, size))
 
 ##    for car in cars:
 ##        print(car.get_weights()[0][0][0])
@@ -85,7 +85,7 @@ def next_gen_cars(top_cars, window, resolution, pos, size, cars):
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def race(window, clock, resolution, action, mouse_used):
+def race(window, clock, action, mouse_used):
     paused = False
     display_debug = True
     car_debug = False
@@ -102,7 +102,7 @@ def race(window, clock, resolution, action, mouse_used):
     track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     for car in range(50):
-        cars.append(car_o.Car(window, resolution, [asp_ratio*300, asp_ratio*300], 10))
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
 
     while action == "race":
         window.fill(const.COL["black"])
@@ -179,10 +179,10 @@ def race(window, clock, resolution, action, mouse_used):
             
             top_cars = find_top_cars(cars)
 
-            next_gen_cars(top_cars, window, resolution, [300, 300], 10, cars)
+            next_gen_cars(top_cars, window, [300, 300], 10, cars)
 
 ##            highest_car = find_top_car(cars)
-##            next_cars(highest_car, window, resolution, [300, 300], 10, cars)
+##            next_cars(highest_car, window, [300, 300], 10, cars)
 
 ##            for car in cars:
 ##                print(car.get_biases()[0][0])
@@ -196,9 +196,9 @@ def race(window, clock, resolution, action, mouse_used):
         #Display debug info
         if display_debug:
             pygame_ui.draw_text(window, "fps: {}".format(str(int(clock.get_fps()))),
-                      [resolution[0]/32, resolution[1]/14], int(resolution[0]/72), const.COL["white"], "calibri", "ml")
+                      [window.get_size()[0]/32, window.get_size()[1]/14], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
             pygame_ui.draw_text(window, "generation {}".format(str(gen)),
-                      [resolution[0]/32, resolution[1]/10], int(resolution[0]/72), const.COL["white"], "calibri", "ml")
+                      [window.get_size()[0]/32, window.get_size()[1]/10], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
 
         pygame.display.update()
         

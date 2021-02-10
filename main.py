@@ -7,32 +7,32 @@ import network
 from pygame.locals import *
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def init_objects(window, resolution):
+def init_objects(window):
 
     #initiate text buttons
-    start = resolution[1] * 41 / 108
-    incriment = resolution[1] * 7 / 54
-    quit_button = pygame_ui.Single_Button(window, [resolution[1] / 3.6, start + incriment * 4],
-                                          resolution[0]/5, resolution[0] / 30, "QUIT", const.COL["black"], const.COL["white"])
+    start = window.get_size()[1] * 41 / 108
+    incriment = window.get_size()[1] * 7 / 54
+    quit_button = pygame_ui.Single_Button(window, [window.get_size()[1] / 3.6, start + incriment * 4],
+                                          window.get_size()[0]/5, window.get_size()[0] / 30, "QUIT", const.COL["black"], const.COL["white"])
     
-    start_button = pygame_ui.Single_Button(window, [resolution[1] / 3.6, start + incriment * 2],
-                                          resolution[0]/5, resolution[0] / 30, "START", const.COL["black"], const.COL["white"])
+    start_button = pygame_ui.Single_Button(window, [window.get_size()[1] / 3.6, start + incriment * 2],
+                                          window.get_size()[0]/5, window.get_size()[0] / 30, "START", const.COL["black"], const.COL["white"])
 
-    back_button = pygame_ui.Single_Button(window, [resolution[0]/2, resolution[1] - resolution[0] / 16],
-                                          resolution[0]/5, resolution[0] / 30, "BACK", const.COL["black"], const.COL["white"])
+    back_button = pygame_ui.Single_Button(window, [window.get_size()[0]/2, window.get_size()[1] - window.get_size()[0] / 16],
+                                          window.get_size()[0]/5, window.get_size()[0] / 30, "BACK", const.COL["black"], const.COL["white"])
     
-    settings_button = pygame_ui.Single_Button(window, [resolution[1] / 3.6, start + incriment * 3],
-                                          resolution[0]/5, resolution[0] / 30, "SETTINGS", const.COL["black"], const.COL["white"])
+    settings_button = pygame_ui.Single_Button(window, [window.get_size()[1] / 3.6, start + incriment * 3],
+                                          window.get_size()[0]/5, window.get_size()[0] / 30, "SETTINGS", const.COL["black"], const.COL["white"])
 
-    apply_button = pygame_ui.Single_Button(window, [resolution[1] / 3.6, start + incriment * 3],
-                                          resolution[0]/5, resolution[0] / 30, "APPLY", const.COL["black"], const.COL["white"])
+    apply_button = pygame_ui.Single_Button(window, [window.get_size()[1] / 3.6, start + incriment * 3],
+                                          window.get_size()[0]/5, window.get_size()[0] / 30, "APPLY", const.COL["black"], const.COL["white"])
 
 
     #Initiate Arrows
-    res_up   = pygame_ui.Up_Arrow(  window, [resolution[0]/2 - resolution[0]/5.5, resolution[1]/3], resolution[1]/54, const.COL["white"], const.COL["black"])
-    res_down = pygame_ui.Down_Arrow(window, [resolution[0]/2 - resolution[0]/5.5, resolution[1]/3], resolution[1]/54, const.COL["white"], const.COL["black"])
-    screen_up   = pygame_ui.Up_Arrow(  window, [resolution[0]/2 - resolution[0]/5.5, resolution[1]/2], resolution[1]/54, const.COL["white"], const.COL["black"])
-    screen_down = pygame_ui.Down_Arrow(window, [resolution[0]/2 - resolution[0]/5.5, resolution[1]/2], resolution[1]/54, const.COL["white"], const.COL["black"])
+    res_up   = pygame_ui.Up_Arrow(  window, [window.get_size()[0]/2 - window.get_size()[0]/5.5, window.get_size()[1]/3], window.get_size()[1]/54, const.COL["white"], const.COL["black"])
+    res_down = pygame_ui.Down_Arrow(window, [window.get_size()[0]/2 - window.get_size()[0]/5.5, window.get_size()[1]/3], window.get_size()[1]/54, const.COL["white"], const.COL["black"])
+    screen_up   = pygame_ui.Up_Arrow(  window, [window.get_size()[0]/2 - window.get_size()[0]/5.5, window.get_size()[1]/2], window.get_size()[1]/54, const.COL["white"], const.COL["black"])
+    screen_down = pygame_ui.Down_Arrow(window, [window.get_size()[0]/2 - window.get_size()[0]/5.5, window.get_size()[1]/2], window.get_size()[1]/54, const.COL["white"], const.COL["black"])
 
     #Add buttons to dictionary
     buttons = {"quit" : quit_button,
@@ -152,29 +152,28 @@ def settings(window, resolution, action, buttons, mouse_used):
                     quit()
 
         window.blit(image, [resolution[0] - resolution[1]*1.1, 0])
-        pygame_ui.draw_text(window, 'Alex Elwood | BETA (0.0.1)', [resolution[0] / 1.007, resolution[1]/1.02], int(resolution[1] / 56), const.COL["white"], 'calibri', 'mr')
 
         pygame.display.update()
 
     return action, mouse_used, resolution, window
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def main_menu(window, resolution, action, buttons, mouse_used):
+def main_menu(window, action, buttons, mouse_used):
     used_buttons = {"settings" : buttons["settings"],
                     "quit" : buttons["quit"],
                     "start" : buttons["start"]
                     }
 
     image = pygame.image.load("assets\{}.jpg".format("brain"))
-    image = pygame.transform.scale(image, (resolution[1], resolution[1]))
+    image = pygame.transform.scale(image, ((window.get_size()[1]), (window.get_size()[1])))
 
-    start = resolution[1] / 2
-    incriment = resolution[1] * 7 / 54
-    used_buttons["start"].set_pos([resolution[0] / 5, start])
-    used_buttons["settings"].set_pos([resolution[0] / 5, start + incriment])
-    used_buttons["quit"].set_pos([resolution[0] / 5, start + incriment * 2])
+    start = window.get_size()[1] / 2
+    incriment = window.get_size()[1] * 7 / 54
+    used_buttons["start"].set_pos([window.get_size()[0] / 5, start])
+    used_buttons["settings"].set_pos([window.get_size()[0] / 5, start + incriment])
+    used_buttons["quit"].set_pos([window.get_size()[0] / 5, start + incriment * 2])
 
-    incriment_1 = resolution[1] / 10
+    incriment_1 = window.get_size()[1] / 10
     
     while action == "main":
         #Reset mouse usage
@@ -206,10 +205,10 @@ def main_menu(window, resolution, action, buttons, mouse_used):
             used_buttons[button].render()
             
 
-        window.blit(image, [resolution[0] - resolution[1]*1.1, 0])
-        pygame_ui.draw_text(window, 'Artificial', [resolution[0]/5, resolution[1]/10.8], int(resolution[1] / 10.5), const.COL["white"], 'impact', 'c')
-        pygame_ui.draw_text(window, 'Intelligence', [resolution[0]/5, resolution[1]/10.8 + incriment_1], int(resolution[1] / 10.5), const.COL["white"], 'impact', 'c')
-        pygame_ui.draw_text(window, 'Alex Elwood | BETA (0.0.1)', [resolution[0] / 1.007, resolution[1]/1.02], int(resolution[1] / 56), const.COL["white"], 'calibri', 'mr')
+        window.blit(image, [window.get_size()[0] - window.get_size()[1]*1.1, 0])
+        pygame_ui.draw_text(window, 'Artificial', [window.get_size()[0]/5, window.get_size()[1]/10.8], int(window.get_size()[1] / 10.5), const.COL["white"], 'impact', 'c')
+        pygame_ui.draw_text(window, 'Intelligence', [window.get_size()[0]/5, window.get_size()[1]/10.8 + incriment_1], int(window.get_size()[1] / 10.5), const.COL["white"], 'impact', 'c')
+        pygame_ui.draw_text(window, 'Alex Elwood | BETA (0.0.1)', [window.get_size()[0] / 1.007, window.get_size()[1]/1.02], int(window.get_size()[1] / 56), const.COL["white"], 'calibri', 'mr')
         pygame.display.update()
 
     return action, mouse_used
@@ -225,18 +224,18 @@ def main():
 
     mouse_used = False
 
-    buttons = init_objects(window, resolution)
+    buttons = init_objects(window)
 
     action = "race"
     while True:
         if action == "main":
-            action, mouse_used = main_menu(window, resolution, action, buttons, mouse_used)
+            action, mouse_used = main_menu(window, action, buttons, mouse_used)
         elif action == "settings":
-            action, mouse_used, resolution, window = settings(window, resolution, action, buttons, mouse_used)
+            action, mouse_used, window, resolution = settings(window, resolution, action, buttons, mouse_used)
         elif action == "race":
-            action, mouse_used = game.race(window, clock, resolution, action, mouse_used)
+            action, mouse_used = game.race(window, clock, action, mouse_used)
         elif action == "network":
-            action, mouse_used = network.network(window, clock, resolution, action, mouse_used)
+            action, mouse_used = network.network(window, clock, action, mouse_used)
         else:
             pygame.quit()
             quit()

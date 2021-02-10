@@ -41,7 +41,7 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, resolution, pos, size):
+    def __init__(self, window, pos, size):
         self.window = window
         self.size = size
         self.crashed = False
@@ -49,7 +49,7 @@ class Car():
         self.manual = False
 
         #Setup AI
-        self.ai = ai.Neural_Network(window, resolution, 7, [10], 4)
+        self.ai = ai.Neural_Network(window, 7, [10], 4)
 
         #Setup dynamic attributes
         self.pos = np.array(pos)

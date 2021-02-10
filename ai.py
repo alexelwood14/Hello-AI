@@ -92,7 +92,7 @@ class Axon():
 
 #----------------------------------------------------------------------------------------------------------------------------------
 class Neural_Network():
-    def __init__(self, window, resolution, inputs, hidden, outputs):
+    def __init__(self, window, inputs, hidden, outputs):
         self.window = window
         self.inputs = []
         self.hidden = []
@@ -104,8 +104,8 @@ class Neural_Network():
         self.layers = len(hidden) + 1
 
         #Initiate input nodes
-        start = [resolution[0]/5, resolution[1]/5]
-        incriment = resolution[1] * 3 / 5 / (inputs-1)
+        start = [window.get_size()[0]/5, window.get_size()[1]/5]
+        incriment = window.get_size()[1] * 3 / 5 / (inputs-1)
         for node in range(inputs):
             self.inputs.append(Input_Neuron(window, [start[0], start[1] + incriment * node]))
 
@@ -113,11 +113,11 @@ class Neural_Network():
         #---INITIATE HIDDEN LAYER BIASES AND NODES---
         
         #Initiate weights leading to hidden layers
-        start = [resolution[0]/5, resolution[1]/8]
+        start = [window.get_size()[0]/5, window.get_size()[1]/8]
         for layer in range(len(hidden)):
             
             #Node position incriment
-            incriment = [resolution[0]*3/5/(len(hidden)+1), resolution[1] * 3 / 4 / (hidden[layer]-1)]
+            incriment = [window.get_size()[0]*3/5/(len(hidden)+1), window.get_size()[1] * 3 / 4 / (hidden[layer]-1)]
 
             #Setup biases matrix using first element
             pos = [start[0] + incriment[0] * (layer+1), start[1]]
@@ -178,8 +178,8 @@ class Neural_Network():
         #---INITIATE OUTPUT BIASES AND NODES---
 
         #Set output node positioning variables
-        start = [resolution[0] - resolution[0]/5, resolution[1]/5]
-        incriment = resolution[1] * 3 / 5 / (outputs-1)
+        start = [window.get_size()[0] - window.get_size()[0]/5, window.get_size()[1]/5]
+        incriment = window.get_size()[1] * 3 / 5 / (outputs-1)
 
         #Setup biases matrix using first element
         pos = start
