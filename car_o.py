@@ -41,16 +41,15 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, resolution, colours, pos, size):
+    def __init__(self, window, resolution, pos, size):
         self.window = window
-        self.colours = colours
         self.size = size
         self.crashed = False
         self.progress = 0
         self.manual = False
 
         #Setup AI
-        self.ai = ai.Neural_Network(window, colours, resolution, 7, [10], 4)
+        self.ai = ai.Neural_Network(window, resolution, 7, [10], 4)
 
         #Setup dynamic attributes
         self.pos = np.array(pos)
@@ -102,10 +101,10 @@ class Car():
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(window, colours["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, colours["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, colours["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, colours["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], size / 3))
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -287,7 +286,7 @@ class Car():
         for wheel in self.wheels:
             wheel.render()
 
-        pygame.draw.polygon(self.window, self.colours["red"], self.points_mat)
+        pygame.draw.polygon(self.window, const.COL["red"], self.points_mat)
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -303,17 +302,17 @@ class Car():
 
     def find_distances(self):
         #Calculate distnace to wall in front of car
-        forward_pos = self.iterate_distance(self.direcion_norm, self.pos, self.colours["light_grey"][0], 100, 1)
+        forward_pos = self.iterate_distance(self.direcion_norm, self.pos, const.COL["light_grey"][0], 100, 1)
         vector = self.pos - forward_pos
         self.forward_dist = np.sqrt((vector).dot(vector)) / 2000
         
         #Calculate distnace to wall left of car
-        left_pos = self.iterate_distance(self.rear_norm, self.pos, self.colours["light_grey"][0], 10, 1)
+        left_pos = self.iterate_distance(self.rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
         vector = self.pos - left_pos
         self.left_dist = np.sqrt((vector).dot(vector)) / 2000
         
         #Calculate distnace to wall right of car
-        right_pos = self.iterate_distance(self.anti_rear_norm, self.pos, self.colours["light_grey"][0], 10, 1)
+        right_pos = self.iterate_distance(self.anti_rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
         vector = self.pos - right_pos
         self.right_dist = np.sqrt((vector).dot(vector)) / 2000
 
@@ -341,11 +340,11 @@ class Car():
             
 #----------------------------------------------------------------------------------------------------------------------------------        
     def display_debug(self):
-        pygame.draw.line(self.window, self.colours["yellow"], self.pos + self.rear_axel + 10000 * self.rear_norm,
+        pygame.draw.line(self.window, const.COL["yellow"], self.pos + self.rear_axel + 10000 * self.rear_norm,
                          self.pos + self.rear_axel - 10000 * self.rear_norm)
-        pygame.draw.line(self.window, self.colours["yellow"], self.pos + self.front_axel + 10000 * self.front_norm,
+        pygame.draw.line(self.window, const.COL["yellow"], self.pos + self.front_axel + 10000 * self.front_norm,
                          self.pos + self.front_axel - 10000 * self.front_norm)
-        pygame.draw.circle(self.window, self.colours["blue"], [int(self.turning_point[0]), int(self.turning_point[1])], 3)
+        pygame.draw.circle(self.window, const.COL["blue"], [int(self.turning_point[0]), int(self.turning_point[1])], 3)
         
 
     def find_progress(self, track):
@@ -437,10 +436,10 @@ class Car():
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(self.window, self.colours["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, self.colours["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, self.colours["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, self.colours["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], self.size / 3))
+        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], self.size / 3))
+        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], self.size / 3))
+        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], self.size / 3))
+        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], self.size / 3))
             
         
 #----------------------------------------------------------------------------------------------------------------------------------
