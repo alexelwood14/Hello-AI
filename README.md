@@ -1,29 +1,29 @@
 # Hello-AI
 
-Hello-AI is a personal project to create a simple AI to drive a car around an arbitrary track using a genetic artificial neural network training method
+        Hello-AI is a personal project to create a simple AI to drive a car around an arbitrary track using a genetic artificial neural network training method
 
-Controls:\n
-    Program Wide:\n
+        Controls:\n
+        Program Wide:\n
         Quit program            ESC\n
 
-    In Track View:\n
-        Toggle disply debug     Z\n
-        Toggle pause            P\n
-        Return to main menu     M\n
+    In Track View:
+        Toggle disply debug     Z
+        Toggle pause            P
+        Return to main menu     M
 
-    In Network Viewer:\n
-        Toggle disply debug     Z\n
-        Toggle display biases   X\n
-        Return to main menu     M\n
+    In Network Viewer:
+        Toggle disply debug     Z
+        Toggle display biases   X
+        Return to main menu     M
 
     Manual Car Control:
-        Accelerate              W\n
-        Decelerate              S\n
-        Turn Left               A\n
-        Turn Right              D\n
+        Accelerate              W
+        Decelerate              S
+        Turn Left               A
+        Turn Right              D
 
-Required Libaries:\n
-pygame\n
-numpy\n
-math\n
-random\n
+        Required Libaries:
+        pygame
+        numpy
+        math
+        random
