@@ -156,7 +156,7 @@ class Image_Button():
         self.size = size
         self.aspect = 3.5
         self.colours = colours
-        self.image = pygame.image.load("Assets\{}.jpg".format(image))
+        self.image = pygame.image.load("assets\{}.jpg".format(image))
         self.image = pygame.transform.scale(self.image, self.size)
         self.text = text
         self.text_size = text_size
