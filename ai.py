@@ -280,7 +280,9 @@ class Neural_Network():
 
 
     def set_weights(self, weights):
-        self.weights = weights[:]
+        for layer in range(len(weights)):
+            for node in range(len(self.weights[layer])):
+                self.weights[layer][node] = weights[layer][node][:]
 
         for layer in range(len(self.weights)):
             for node in range(len(self.weights[layer])):
@@ -289,7 +291,8 @@ class Neural_Network():
 
 
     def set_biases(self, biases):
-        self.biases = biases[:]
+        for layer in range(len(biases)):
+            self.biases[layer] = biases[layer][:]
 
         for layer in range(len(self.biases)):
             for bias in range(len(self.biases[layer])):
