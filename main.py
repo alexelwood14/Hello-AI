@@ -164,7 +164,7 @@ def main_menu(colours, window, resolution, action, buttons, mouse_used):
                     "start" : buttons["start"]
                     }
 
-    image = pygame.image.load("Assets\{}.jpg".format("brain"))
+    image = pygame.image.load("assets\{}.jpg".format("brain"))
     image = pygame.transform.scale(image, (resolution[1], resolution[1]))
 
     start = resolution[1] / 2
