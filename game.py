@@ -132,8 +132,6 @@ def race(window, clock, action, mouse_used):
                 if car.get_progress() < 0 or car.get_progress() > 0.5:
                     print("error")
                     print(car.get_progress())
-##                average_progress += car.get_progress()
-##            average_progress /= len(cars)
             
             top_cars = find_top_cars(cars)
             cars = next_gen_cars(top_cars, window, cars)
