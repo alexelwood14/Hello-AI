@@ -394,7 +394,7 @@ class Car():
         return self.ai.get_weights()
 
     def reset(self):
-        asp_ratio = self.window.get_size() / const.BASE_RES
+        asp_ratio = self.window.get_size()[1] / const.BASE_RES
         self.pos = asp_ratio * np.array([300, 300])
         self.speed = 0.0
         self.vel = np.array([0.0,0.0])
