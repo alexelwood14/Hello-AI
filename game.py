@@ -12,77 +12,33 @@ def menu():
 
 
 def find_top_cars(cars):
-    #Setup top cars array using first 5 cars
+    temp_cars = cars[:]
     top_cars = []
-    for car in range(5):
-        top_cars.append(cars[car])
-
-    lowest = 1.1
-    for car in top_cars:
-        if car.get_progress() < lowest:
-            lowest_car = car
-            lowest = car.get_progress()
-
-    #Find all of the other top cars
-    for car in range(5, len(cars)):
-        if cars[car].get_progress() > lowest:
-            top_cars[top_cars.index(lowest_car)] = cars[car]
-
-            lowest = 1.1
-            for i in top_cars:
-                if i.get_progress() < lowest:
-                    lowest_car = i
-                    lowest = i.get_progress()
+    for i in range(5):
+        highest, index = find_top_car(temp_cars)
+        top_cars.append(highest)
+        temp_cars.pop(index)
 
     return top_cars
 
 
 def find_top_car(cars):
-    highest = -1
-    for car in cars:
-        if car.get_progress() > highest:
-            highest = car.get_progress()
-            highest_car = car
+    highest = cars[0]
+    index = -1
+    for car in range(len(cars)):
+        if cars[car].get_progress() > highest.get_progress():
+            highest = cars[car]
+            index = car
 
-    return highest_car
-
-
-def next_cars(highest_car, window, pos, size, cars):
-##    cars = []
-    top_cars = [highest_car]
-##    for car in top_cars:
-##        for i in range(50):
-##            cars.append(car_o.Car(window, pos, size))
-
-    for car in range(len(top_cars)):
-        for i in range(50):
-            cars[car * (i+1)].set_biases(top_cars[car].get_biases())
-            cars[car * (i+1)].set_weights(top_cars[car].get_weights())
-        
-##    return cars
-
+    return highest, index
+    
 
 def next_gen_cars(top_cars, window, pos, size, cars):
-##    cars = []
-##    for car in top_cars:
-##        for i in range(10):
-##            cars.append(car_o.Car(window, pos, size))
-
-##    for car in cars:
-##        print(car.get_weights()[0][0][0])
-##    print("")
-
     for car in range(len(top_cars)):
         for i in range(10):
             cars[(car * 10) + i].set_biases(top_cars[car].get_biases())
             cars[(car * 10) + i].set_weights(top_cars[car].get_weights())
             cars[(car * 10) + i].reset()
-
-##    for car in cars:
-##        print(car.get_weights()[0][0][0])
-
-##    return cars
-
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
@@ -172,21 +128,10 @@ def race(window, clock, action, mouse_used):
                     print(car.get_progress())
 ##                average_progress += car.get_progress()
 ##            average_progress /= len(cars)
-
-
-##            print(average_progress)
-            
             
             top_cars = find_top_cars(cars)
 
-            next_gen_cars(top_cars, window, [300, 300], 10, cars)
-
-##            highest_car = find_top_car(cars)
-##            next_cars(highest_car, window, [300, 300], 10, cars)
-
-##            for car in cars:
-##                print(car.get_biases()[0][0])
-##            print("")
+            next_gen_cars(top_cars, window, [asp_ratio*300, asp_ratio*300], 10, cars)
 
             gen += 1
             simulating = True
