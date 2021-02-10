@@ -175,7 +175,7 @@ class Car():
         inputs = self.ai.process([speed_forwards, speed_backwards, wheel_right, wheel_left,
                                   self.forward_dist, self.right_dist, self.left_dist])
 
-        self.acc = (inputs[0] - inputs[1]) * 100
+        self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
 
         self.wheel_ang += self.wheel_vel * frame_time
