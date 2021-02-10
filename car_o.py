@@ -392,6 +392,12 @@ class Car():
     def get_weights(self):
         return self.ai.get_weights()
 
+    def mutate_biases(self):
+        self.ai.mutate_biases()
+
+    def mutate_weights(self):
+        self.ai.mutate_weights()
+
     def reset(self):
         asp_ratio = self.window.get_size()[1] / const.BASE_RES
         self.pos = asp_ratio * np.array([300, 300])

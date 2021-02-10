@@ -284,19 +284,23 @@ class Neural_Network():
             for node in range(len(self.weights[layer])):
                 self.weights[layer][node] = weights[layer][node][:]
 
-        for layer in range(len(self.weights)):
-            for node in range(len(self.weights[layer])):
-                for w in range(len(self.weights[layer][node])):
-                    self.weights[layer][node][w] = np.random.normal(self.weights[layer][node][w], 0.2)
-
 
     def set_biases(self, biases):
         for layer in range(len(biases)):
             self.biases[layer] = biases[layer][:]
 
+
+    def mutate_biases(self):
         for layer in range(len(self.biases)):
             for bias in range(len(self.biases[layer])):
                 self.biases[layer][bias] = np.random.normal(self.biases[layer][bias], 0.2)
+
+
+    def mutate_weights(self):
+        for layer in range(len(self.weights)):
+            for node in range(len(self.weights[layer])):
+                for w in range(len(self.weights[layer][node])):
+                    self.weights[layer][node][w] = np.random.normal(self.weights[layer][node][w], 0.2)
 
         
     def get_weights(self):

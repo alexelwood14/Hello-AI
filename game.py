@@ -39,10 +39,14 @@ def next_gen_cars(top_cars, window, cars):
     for i in range(50):
         cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
 
-    for car in range(len(top_cars)):
-        for i in range(10):
-            cars[(car * 10) + i].set_biases(top_cars[car].get_biases())
-            cars[(car * 10) + i].set_weights(top_cars[car].get_weights())
+    for i in range(10):
+        for car in range(len(top_cars)):
+            cars[(i * 5) + car].set_biases(top_cars[car].get_biases())
+            cars[(i * 5) + car].set_weights(top_cars[car].get_weights())
+            
+    for car in range(45):
+        cars[car].mutate_biases()
+        cars[car].mutate_weights()
 
     return cars
 
