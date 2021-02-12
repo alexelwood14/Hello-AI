@@ -39,12 +39,41 @@ def next_gen_cars(top_cars, window, cars):
     for i in range(50):
         cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
 
-    for car in range(len(top_cars)):
-        for i in range(10):
-            cars[(car * 10) + i].set_biases(top_cars[car].get_biases())
-            cars[(car * 10) + i].set_weights(top_cars[car].get_weights())
+    for i in range(10):
+        for car in range(len(top_cars)):
+            cars[(i * 5) + car].set_biases(top_cars[car].get_biases())
+            cars[(i * 5) + car].set_weights(top_cars[car].get_weights())
+            
+    for car in range(45):
+        cars[car].mutate_biases()
+        cars[car].mutate_weights()
 
     return cars
+
+def get_track_points(file, asp_ratio):
+    track_points = []
+    f = open("data\{}".format(file), "r")
+    for line in f:
+        point = line.split()
+        track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
+    return track_points
+
+def write_snapshot(top_cars):
+    f = open("data\snapshot", "w")
+    f.close()
+    f = open("data\snapshot", "a")
+
+    for car in range(len(top_cars)):
+        f.write("NETWORK_{}\n".format(car))
+        weights = top_cars[car].get_weights()
+        biases = top_cars[car].get_biases()
+        f.write(str(weights))
+        f.write("\n")
+        f.write(str(biases))
+        f.write("\n")
+    
+    f.close()
+
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
@@ -55,11 +84,13 @@ def race(window, clock, action, mouse_used):
     gen_time = 0
     gen = 0
     cars = [] 
+    f = open("data/average_progress", "w")
+    f.write("AVG_PROGRESS")
+    f.close()
+    f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-
-    track_points = [asp_ratio*np.array([300, 300]), asp_ratio*np.array([1620, 300]),
-                    asp_ratio*np.array([1620, 800]), asp_ratio*np.array([300, 800])]
+    track_points = get_track_points("track2", asp_ratio)
 
     track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
@@ -71,7 +102,7 @@ def race(window, clock, action, mouse_used):
         frame_time = clock.tick() / 1000
         if not paused:
             gen_time += frame_time
-        if gen_time >= 10:
+        if gen_time >= 60:
             simulating = False
 
         #process inputs
@@ -129,11 +160,17 @@ def race(window, clock, action, mouse_used):
         else:
             average_progress = 0
             for car in cars:
-                if car.get_progress() < 0 or car.get_progress() > 0.5:
+                if car.get_progress() < 0:
                     print("error")
                     print(car.get_progress())
+
+                average_progress += car.get_progress()
+            average_progress /= len(cars)
+            f.write("\n")
+            f.write(str(average_progress))
             
             top_cars = find_top_cars(cars)
+            write_snapshot(top_cars)
             cars = next_gen_cars(top_cars, window, cars)
 
             gen += 1
@@ -150,7 +187,7 @@ def race(window, clock, action, mouse_used):
 
         pygame.display.update()
         
-
+    f.close()
     return action, mouse_used
 
 #----------------------------------------------------------------------------------------------------------------------------------
