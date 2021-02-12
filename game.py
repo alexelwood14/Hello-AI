@@ -58,6 +58,23 @@ def get_track_points(file, asp_ratio):
         track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
     return track_points
 
+def write_snapshot(top_cars):
+    f = open("data\snapshot", "w")
+    f.close()
+    f = open("data\snapshot", "a")
+
+    for car in range(len(top_cars)):
+        f.write("NETWORK_{}\n".format(car))
+        weights = top_cars[car].get_weights()
+        biases = top_cars[car].get_biases()
+        f.write(str(weights))
+        f.write("\n")
+        f.write(str(biases))
+        f.write("\n")
+    
+    f.close()
+
+
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
     paused = False
@@ -142,8 +159,12 @@ def race(window, clock, action, mouse_used):
                 if car.get_progress() < 0:
                     print("error")
                     print(car.get_progress())
+
+                average_progress += car.get_progress()
+            average_progress /= len(cars)
             
             top_cars = find_top_cars(cars)
+            write_snapshot(top_cars)
             cars = next_gen_cars(top_cars, window, cars)
 
             gen += 1
