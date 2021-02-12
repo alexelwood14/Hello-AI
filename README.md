@@ -8,6 +8,7 @@ Hello-AI is a personal project to create a simple AI to drive a car around an ar
 
         In Track View:
             Toggle disply debug     Z
+            Skip to Next Gen        X
             Toggle pause            P
             Return to main menu     M
 
