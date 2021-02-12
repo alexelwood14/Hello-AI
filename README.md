@@ -22,7 +22,7 @@ Hello-AI is a personal project to create a simple AI to drive a car around an ar
             Turn Left               A
             Turn Right              D
 
-    Required Libaries:
+    Required Libraries:
         pygame
         numpy
         math
