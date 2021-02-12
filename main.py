@@ -226,7 +226,7 @@ def main():
 
     buttons = init_objects(window)
 
-    action = "race"
+    action = "main"
     while True:
         if action == "main":
             action, mouse_used = main_menu(window, action, buttons, mouse_used)

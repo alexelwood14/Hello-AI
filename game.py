@@ -75,9 +75,8 @@ def race(window, clock, action, mouse_used):
         frame_time = clock.tick() / 1000
         if not paused:
             gen_time += frame_time
-        if gen_time >= 10:
-            pass
-            #simulating = False
+        if gen_time >= 60:
+            simulating = False
 
         #process inputs
         for event in pygame.event.get():
