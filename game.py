@@ -50,6 +50,14 @@ def next_gen_cars(top_cars, window, cars):
 
     return cars
 
+def get_track_points(file, asp_ratio):
+    track_points = []
+    f = open("data\{}".format(file), "r")
+    for line in f:
+        point = line.split()
+        track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
+    return track_points
+
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
     paused = False
@@ -61,9 +69,7 @@ def race(window, clock, action, mouse_used):
     cars = [] 
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-
-    track_points = [asp_ratio*np.array([300, 300]), asp_ratio*np.array([1620, 300]),
-                    asp_ratio*np.array([1620, 800]), asp_ratio*np.array([300, 800])]
+    track_points = get_track_points("track1", asp_ratio)
 
     track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
@@ -133,7 +139,7 @@ def race(window, clock, action, mouse_used):
         else:
             average_progress = 0
             for car in cars:
-                if car.get_progress() < 0 or car.get_progress() > 0.5:
+                if car.get_progress() < 0:
                     print("error")
                     print(car.get_progress())
             
