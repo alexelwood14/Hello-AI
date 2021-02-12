@@ -84,9 +84,13 @@ def race(window, clock, action, mouse_used):
     gen_time = 0
     gen = 0
     cars = [] 
+    f = open("data/average_progress", "w")
+    f.write("AVG_PROGRESS")
+    f.close()
+    f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track1", asp_ratio)
+    track_points = get_track_points("track2", asp_ratio)
 
     track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
@@ -162,6 +166,8 @@ def race(window, clock, action, mouse_used):
 
                 average_progress += car.get_progress()
             average_progress /= len(cars)
+            f.write("\n")
+            f.write(str(average_progress))
             
             top_cars = find_top_cars(cars)
             write_snapshot(top_cars)
@@ -181,7 +187,7 @@ def race(window, clock, action, mouse_used):
 
         pygame.display.update()
         
-
+    f.close()
     return action, mouse_used
 
 #----------------------------------------------------------------------------------------------------------------------------------
