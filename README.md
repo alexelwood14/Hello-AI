@@ -1,6 +1,6 @@
 # Hello-AI
 
-Hello-AI is a personal project to create a simple AI to drive a car around an arbitrary track using a genetic artificial neural network training method.
+Hello-AI is a personal project to create a simple AI to drive a car around an arbitrary track using an artificial neural network trained using a genetic/evolutionary method.
 
     Controls:
         Program Wide:
