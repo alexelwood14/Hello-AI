@@ -1,3 +1,4 @@
+import const
 import pygame
 import math
 import numpy as np
@@ -11,80 +12,71 @@ def menu():
 
 
 def find_top_cars(cars):
-    #Setup top cars array using first 5 cars
+    temp_cars = cars[:]
     top_cars = []
-    for car in range(5):
-        top_cars.append(cars[car])
-
-    lowest = 1.1
-    for car in top_cars:
-        if car.get_progress() < lowest:
-            lowest_car = car
-            lowest = car.get_progress()
-
-    #Find all of the other top cars
-    for car in range(5, len(cars)):
-        if cars[car].get_progress() > lowest:
-            top_cars[top_cars.index(lowest_car)] = cars[car]
-
-            lowest = 1.1
-            for i in top_cars:
-                if i.get_progress() < lowest:
-                    lowest_car = i
-                    lowest = i.get_progress()
+    for i in range(5):
+        highest, index = find_top_car(temp_cars)
+        top_cars.append(highest)
+        temp_cars.pop(index)
 
     return top_cars
 
 
 def find_top_car(cars):
-    highest = -1
-    for car in cars:
-        if car.get_progress() > highest:
-            highest = car.get_progress()
-            highest_car = car
+    highest = cars[0]
+    index = -1
+    for car in range(len(cars)):
+        if cars[car].get_progress() > highest.get_progress():
+            highest = cars[car]
+            index = car
 
-    return highest_car
+    return highest, index
 
 
-def next_cars(highest_car, window, resolution, colours, pos, size, cars):
-##    cars = []
-    top_cars = [highest_car]
-##    for car in top_cars:
-##        for i in range(50):
-##            cars.append(car_o.Car(window, resolution, colours, pos, size))
+def next_gen_cars(top_cars, window, cars):
+    cars = []
+    asp_ratio = window.get_size()[1] / const.BASE_RES
+    for i in range(50):
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
+
+    for i in range(10):
+        for car in range(len(top_cars)):
+            cars[(i * 5) + car].set_biases(top_cars[car].get_biases())
+            cars[(i * 5) + car].set_weights(top_cars[car].get_weights())
+            
+    for car in range(45):
+        cars[car].mutate_biases()
+        cars[car].mutate_weights()
+
+    return cars
+
+def get_track_points(file, asp_ratio):
+    track_points = []
+    f = open("data\{}".format(file), "r")
+    for line in f:
+        point = line.split()
+        track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
+    return track_points
+
+def write_snapshot(top_cars):
+    f = open("data\snapshot", "w")
+    f.close()
+    f = open("data\snapshot", "a")
 
     for car in range(len(top_cars)):
-        for i in range(50):
-            cars[car * (i+1)].set_biases(top_cars[car].get_biases())
-            cars[car * (i+1)].set_weights(top_cars[car].get_weights())
-        
-##    return cars
-
-
-def next_gen_cars(top_cars, window, resolution, colours, pos, size, cars):
-##    cars = []
-##    for car in top_cars:
-##        for i in range(10):
-##            cars.append(car_o.Car(window, resolution, colours, pos, size))
-
-##    for car in cars:
-##        print(car.get_weights()[0][0][0])
-##    print("")
-
-    for car in range(len(top_cars)):
-        for i in range(10):
-            cars[(car * 10) + i].set_biases(top_cars[car].get_biases())
-            cars[(car * 10) + i].set_weights(top_cars[car].get_weights())
-            cars[(car * 10) + i].reset()
-
-##    for car in cars:
-##        print(car.get_weights()[0][0][0])
-
-##    return cars
+        f.write("NETWORK_{}\n".format(car))
+        weights = top_cars[car].get_weights()
+        biases = top_cars[car].get_biases()
+        f.write(str(weights))
+        f.write("\n")
+        f.write(str(biases))
+        f.write("\n")
+    
+    f.close()
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def race(window, clock, colours, resolution, action, mouse_used):
+def race(window, clock, action, mouse_used):
     paused = False
     display_debug = True
     car_debug = False
@@ -92,19 +84,25 @@ def race(window, clock, colours, resolution, action, mouse_used):
     gen_time = 0
     gen = 0
     cars = [] 
+    f = open("data/average_progress", "w")
+    f.write("AVG_PROGRESS")
+    f.close()
+    f = open("data/average_progress", "a")
 
-    track_1 = map_o.Map(window, colours["light_grey"], [np.array([300, 300]), np.array([1620, 300]),
-                                                        np.array([1620, 800]), np.array([300, 800])], 100)
+    asp_ratio = window.get_size()[1] / const.BASE_RES
+    track_points = get_track_points("track2", asp_ratio)
+
+    track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     for car in range(50):
-        cars.append(car_o.Car(window, resolution, colours, [300, 300], 10))
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
 
     while action == "race":
-        window.fill(colours["black"])
+        window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
         if not paused:
             gen_time += frame_time
-        if gen_time >= 10:
+        if gen_time >= 60:
             simulating = False
 
         #process inputs
@@ -162,26 +160,18 @@ def race(window, clock, colours, resolution, action, mouse_used):
         else:
             average_progress = 0
             for car in cars:
-                if car.get_progress() < 0 or car.get_progress() > 0.5:
+                if car.get_progress() < 0:
                     print("error")
                     print(car.get_progress())
-##                average_progress += car.get_progress()
-##            average_progress /= len(cars)
 
-
-##            print(average_progress)
-            
+                average_progress += car.get_progress()
+            average_progress /= len(cars)
+            f.write("\n")
+            f.write(str(average_progress))
             
             top_cars = find_top_cars(cars)
-
-            next_gen_cars(top_cars, window, resolution, colours, [300, 300], 10, cars)
-
-##            highest_car = find_top_car(cars)
-##            next_cars(highest_car, window, resolution, colours, [300, 300], 10, cars)
-
-##            for car in cars:
-##                print(car.get_biases()[0][0])
-##            print("")
+            write_snapshot(top_cars)
+            cars = next_gen_cars(top_cars, window, cars)
 
             gen += 1
             simulating = True
@@ -191,13 +181,13 @@ def race(window, clock, colours, resolution, action, mouse_used):
         #Display debug info
         if display_debug:
             pygame_ui.draw_text(window, "fps: {}".format(str(int(clock.get_fps()))),
-                      [resolution[0]/32, resolution[1]/14], int(resolution[0]/72), colours["white"], "calibri", "ml")
+                      [window.get_size()[0]/32, window.get_size()[1]/14], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
             pygame_ui.draw_text(window, "generation {}".format(str(gen)),
-                      [resolution[0]/32, resolution[1]/10], int(resolution[0]/72), colours["white"], "calibri", "ml")
+                      [window.get_size()[0]/32, window.get_size()[1]/10], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
 
         pygame.display.update()
         
-
+    f.close()
     return action, mouse_used
 
 #----------------------------------------------------------------------------------------------------------------------------------

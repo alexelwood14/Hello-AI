@@ -1,3 +1,4 @@
+import const
 import pygame
 from pygame.locals import*
 
@@ -150,13 +151,12 @@ class Single_Button(Button):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 class Image_Button():
-    def __init__(self, window, pos, size, text, text_size, image, colours):
+    def __init__(self, window, pos, size, text, text_size, image):
         self.window = window
         self.pos = pos
         self.size = size
         self.aspect = 3.5
-        self.colours = colours
-        self.image = pygame.image.load("Assets\{}.jpg".format(image))
+        self.image = pygame.image.load("assets\{}.jpg".format(image))
         self.image = pygame.transform.scale(self.image, self.size)
         self.text = text
         self.text_size = text_size
@@ -172,12 +172,12 @@ class Image_Button():
 
     def render(self):
         self.window.blit(self.image, [self.pos[0]- self.size[0]/2, self.pos[1] - self.size[1]/2])
-        draw_text(self.window, self.text, [self.pos[0], self.pos[1] + self.size[1]*0.6], self.text_size, self.colours["white"], "calibri", "c")
+        draw_text(self.window, self.text, [self.pos[0], self.pos[1] + self.size[1]*0.6], self.text_size, const.COL["white"], "calibri", "c")
         if self.highlighted:
-            pygame.draw.rect(self.window, self.colours["red"], [self.pos[0] - self.size[0]/2, self.pos[1] - self.size[1]/2,
+            pygame.draw.rect(self.window, const.COL["red"], [self.pos[0] - self.size[0]/2, self.pos[1] - self.size[1]/2,
                                                              self.size[0], self.size[1]], 5)
         else:
-            pygame.draw.rect(self.window, self.colours["grey"], [self.pos[0] - self.size[0]/2, self.pos[1] - self.size[1]/2,
+            pygame.draw.rect(self.window, const.COL["grey"], [self.pos[0] - self.size[0]/2, self.pos[1] - self.size[1]/2,
                                                              self.size[0], self.size[1]], 5)
 
     def highlight(self, mouse_used):
@@ -326,28 +326,27 @@ class Cross_Button():
         self.pos = pos
 #----------------------------------------------------------------------------------------------------------------------------------
 class Ball_Creator():
-    def __init__(self, window, pos, colours, resolution):
+    def __init__(self, window, pos, resolution):
         self.window = window
         self.pos = pos
-        self.colours = colours
         self.colour = 0
         self.radius = int(resolution[1]/54)
         self.mass = 20
 
-        self.ball_colours = [colours["yellow"], colours["orange"], colours["red"],
-                        colours["light_blue"], colours["blue"], colours["green"],
-                        colours["dark_green"], colours["purple"], colours["pink"]]
+        self.ball_colours = [const.COL["yellow"], const.COL["orange"], const.COL["red"],
+                        const.COL["light_blue"], const.COL["blue"], const.COL["green"],
+                        const.COL["dark_green"], const.COL["purple"], const.COL["pink"]]
         
-        self.delete = Cross_Button(window, [pos[0] + resolution[1]/27*14, pos[1]], resolution[1]/36, colours["red"], colours["white"])
+        self.delete = Cross_Button(window, [pos[0] + resolution[1]/27*14, pos[1]], resolution[1]/36, const.COL["red"], const.COL["white"])
         
-        self.colour_up = Up_Arrow(window, [pos[0] - resolution[1]/2.16, pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
-        self.colour_down = Down_Arrow(window, [pos[0] - resolution[1]/2.16, pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
+        self.colour_up = Up_Arrow(window, [pos[0] - resolution[1]/2.16, pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
+        self.colour_down = Down_Arrow(window, [pos[0] - resolution[1]/2.16, pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
         
-        self.radius_up = Up_Arrow(window, [pos[0], pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
-        self.radius_down = Down_Arrow(window, [pos[0], pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
+        self.radius_up = Up_Arrow(window, [pos[0], pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
+        self.radius_down = Down_Arrow(window, [pos[0], pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
         
-        self.mass_up = Up_Arrow(window, [pos[0] + resolution[1]/54*19, pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
-        self.mass_down = Down_Arrow(window, [pos[0] + resolution[1]/54*19, pos[1]], resolution[1]/54, colours["light_grey"], colours["grey"])
+        self.mass_up = Up_Arrow(window, [pos[0] + resolution[1]/54*19, pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
+        self.mass_down = Down_Arrow(window, [pos[0] + resolution[1]/54*19, pos[1]], resolution[1]/54, const.COL["light_grey"], const.COL["grey"])
 
     def highlight(self, mouse_used, resolution):
         if self.delete.highlight(mouse_used):
@@ -380,13 +379,13 @@ class Ball_Creator():
         return False, False
 
     def render(self, resolution):
-        pygame.draw.rect(self.window, self.colours["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
+        pygame.draw.rect(self.window, const.COL["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
         if self.radius >= resolution[1]/216*7:
             pygame.draw.circle(self.window, self.ball_colours[self.colour], [int(self.pos[0] - resolution[1]/27*14), int(self.pos[1])], int(resolution[1]/216*7))
         else:
             pygame.draw.circle(self.window, self.ball_colours[self.colour], [int(self.pos[0] - resolution[1]/27*14), int(self.pos[1])], self.radius)
-        draw_text(self.window, "RADIUS: {}".format(self.radius), [self.pos[0] - resolution[1]/108*37, self.pos[1] + 3], resolution[0]/30, self.colours["white"], "calibri", "ml")
-        draw_text(self.window, "MASS: {}".format(self.mass), [self.pos[0] + resolution[1]/18, self.pos[1] + 3], resolution[0]/30, self.colours["white"], "calibri", "ml")
+        draw_text(self.window, "RADIUS: {}".format(self.radius), [self.pos[0] - resolution[1]/108*37, self.pos[1] + 3], resolution[0]/30, const.COL["white"], "calibri", "ml")
+        draw_text(self.window, "MASS: {}".format(self.mass), [self.pos[0] + resolution[1]/18, self.pos[1] + 3], resolution[0]/30, const.COL["white"], "calibri", "ml")
         self.delete.render()
         self.colour_up.render()
         self.colour_down.render()
@@ -424,10 +423,9 @@ class Ball_Creator():
         self.mass_down.set_pos([pos[0] + resolution[1]/54*19, pos[1]])
 
 class Add_Creator():
-    def __init__(self, window, pos, colours):
+    def __init__(self, window, pos):
         self.window = window
         self.pos = pos
-        self.colours = colours
         self.highlighted = False
 
     def collision(self, resolution):
@@ -440,16 +438,16 @@ class Add_Creator():
 
     def render(self, resolution):
         if self.highlighted:
-            pygame.draw.rect(self.window, self.colours["light_grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
-            pygame.draw.rect(self.window, self.colours["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5], 4)
+            pygame.draw.rect(self.window, const.COL["light_grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
+            pygame.draw.rect(self.window, const.COL["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5], 4)
 
         else:
-            pygame.draw.rect(self.window, self.colours["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
+            pygame.draw.rect(self.window, const.COL["grey"], [self.pos[0] - resolution[1]/1.8, self.pos[1] - resolution[1]/27, resolution[1]/0.9, resolution[1]/13.5])
 
 
         size_1 = resolution[1]/36
         size_2 = resolution[1]/1080*7
-        pygame.draw.polygon(self.window, self.colours["green"], [[self.pos[0] - size_2, self.pos[1] - size_1],
+        pygame.draw.polygon(self.window, const.COL["green"], [[self.pos[0] - size_2, self.pos[1] - size_1],
                                                                  [self.pos[0] + size_2, self.pos[1] - size_1],
                                                                  [self.pos[0] + size_2, self.pos[1] - size_2],
                                                                  [self.pos[0] + size_1, self.pos[1] - size_2],
