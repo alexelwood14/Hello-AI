@@ -213,19 +213,32 @@ def main_menu(window, action, buttons, mouse_used):
 
     return action, mouse_used
 
+def get_config():
+    resolution = []
+    f = open("data\config", "r")
+    resolution.append(int(f.readline()))
+    resolution.append(int(f.readline()))
+    if f.readline() == "True":
+        windowed = True
+    else:
+        windowed = False
+    return resolution, windowed
+
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
 
     clock = pygame.time.Clock()
-    resolution = [1280, 720]
+    resolution, windowed = get_config()
     pygame.init()
-    window = pygame.display.set_mode((resolution[0], resolution[1]))
+    if windowed:
+        window = pygame.display.set_mode((resolution[0], resolution[1]))
+    else:
+        window = pygame.display.set_mode((resolution[0], resolution[1]), pygame.FULLSCREEN)
     pygame.display.set_caption('Physics')
 
     mouse_used = False
 
     buttons = init_objects(window)
-
     action = "main"
     while True:
         if action == "main":
