@@ -24,7 +24,13 @@ class Map():
     def render(self):
         for point in self.points:
             pygame.draw.circle(self.window, self.colour, point, int(self.width/2))
-        pygame.draw.lines(self.window, self.colour, False, self.points, int(self.width))
+        for point in range(len(self.points)-1):
+            vector = self.points[point+1] - self.points[point]
+            vector /= np.sqrt(vector.dot(vector))
+            normal = np.array([-vector[1], vector[0]])
+            poly_points = [self.points[point] + normal*self.width/2, self.points[point] - normal*self.width/2,
+                           self.points[point+1] - normal*self.width/2, self.points[point+1] + normal*self.width/2]
+            pygame.draw.polygon(self.window, self.colour, poly_points)
 
 
     def on_track(self, coords):
