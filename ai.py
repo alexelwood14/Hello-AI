@@ -287,13 +287,14 @@ class Neural_Network():
 
     def set_biases(self, biases):
         for layer in range(len(biases)):
-            self.biases[layer] = biases[layer][:]
+            for b in range(len(biases[layer])):
+                self.biases[layer][b] = biases[layer][b]
 
 
     def mutate_biases(self):
         for layer in range(len(self.biases)):
             for bias in range(len(self.biases[layer])):
-                self.biases[layer][bias] = np.random.normal(self.biases[layer][bias], 0.1)
+                self.biases[layer][bias] = np.random.normal(self.biases[layer][bias], 0.5)
 
 
     def mutate_weights(self):
