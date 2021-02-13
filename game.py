@@ -1,4 +1,5 @@
 import const
+import time
 import pygame
 import math
 import numpy as np
@@ -14,7 +15,7 @@ def menu():
 def find_top_cars(cars):
     temp_cars = cars[:]
     top_cars = []
-    for i in range(5):
+    for i in range(len(cars)//10):
         highest, index = find_top_car(temp_cars)
         top_cars.append(highest)
         temp_cars.pop(index)
@@ -33,18 +34,20 @@ def find_top_car(cars):
     return highest, index
 
 
-def next_gen_cars(top_cars, window, cars):
+def next_gen_cars(top_cars, window, cars, track):
+    car_num = len(cars)
     cars = []
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    for i in range(50):
-        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
+    start_ang = track.get_start_ang()
+    for i in range(car_num):
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10, start_ang))
 
     for i in range(10):
         for car in range(len(top_cars)):
-            cars[(i * 5) + car].set_biases(top_cars[car].get_biases())
-            cars[(i * 5) + car].set_weights(top_cars[car].get_weights())
+            cars[(i * int(car_num/10)) + car].set_biases(top_cars[car].get_biases())
+            cars[(i * int(car_num/10)) + car].set_weights(top_cars[car].get_weights())
             
-    for car in range(45):
+    for car in range(int(9*car_num/10)):
         cars[car].mutate_biases()
         cars[car].mutate_weights()
 
@@ -83,6 +86,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
+    car_num = 50
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -90,19 +94,19 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track2", asp_ratio)
+    track_points = get_track_points("track3", asp_ratio)
+    track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
-    track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
-
-    for car in range(50):
-        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
-
+    start_ang = track.get_start_ang()
+    for car in range(car_num):
+        cars.append(car_o.Car(window, track_points[0], 10, start_ang))
+    
     while action == "race":
         window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
         if not paused:
             gen_time += frame_time
-        if gen_time >= 60:
+        if gen_time >= 30:
             simulating = False
 
         #process inputs
@@ -136,7 +140,7 @@ def race(window, clock, action, mouse_used):
                     quit()
  
         #Track Processing
-        track_1.render()
+        track.render()
 
         #Car Processing
         if simulating:
@@ -146,11 +150,12 @@ def race(window, clock, action, mouse_used):
                         car.find_distances()
                         car.inputs(frame_time)
                         car.dynamics(frame_time)
-                        car.find_progress(track_1)
+                        car.find_progress(track)
                         car.crash_check()
 
-            for car in cars:
-                car.render()
+            for car in range(len(cars)):
+                if car % (car_num/25) == 0:
+                    cars[car].render()
 
             simulating = False
             for car in cars:
@@ -171,7 +176,7 @@ def race(window, clock, action, mouse_used):
             
             top_cars = find_top_cars(cars)
             write_snapshot(top_cars)
-            cars = next_gen_cars(top_cars, window, cars)
+            cars = next_gen_cars(top_cars, window, cars, track)
 
             gen += 1
             simulating = True
