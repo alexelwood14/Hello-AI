@@ -21,6 +21,13 @@ class Map():
                 self.lines.append(self.points[point + 1] - self.points[point])
             self.track_length += np.sqrt((self.lines[len(self.lines)-1]).dot(self.lines[len(self.lines)-1]))
 
+        vector = self.points[1] - self.points[0]
+        vector /= np.sqrt(vector.dot(vector))
+        if (vector[1] >= 0):
+            self.start_ang = np.arccos(vector.dot(np.array([1,0])))
+        else:
+            self.start_ang = np.arccos(-vector.dot(np.array([1,0])))
+
     def render(self):
         for point in self.points:
             pygame.draw.circle(self.window, self.colour, point, int(self.width/2))
@@ -72,6 +79,9 @@ class Map():
         progress /= self.track_length
 
         return progress
+
+    def get_start_ang(self):
+        return self.start_ang
                 
 
         

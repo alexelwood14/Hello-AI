@@ -34,12 +34,13 @@ def find_top_car(cars):
     return highest, index
 
 
-def next_gen_cars(top_cars, window, cars):
+def next_gen_cars(top_cars, window, cars, track):
     car_num = len(cars)
     cars = []
     asp_ratio = window.get_size()[1] / const.BASE_RES
+    start_ang = track.get_start_ang()
     for i in range(car_num):
-        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
+        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10, start_ang))
 
     for i in range(10):
         for car in range(len(top_cars)):
@@ -85,7 +86,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 100
+    car_num = 50
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -94,12 +95,11 @@ def race(window, clock, action, mouse_used):
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
     track_points = get_track_points("track2", asp_ratio)
+    track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
-    track_1 = map_o.Map(window, const.COL["light_grey"], track_points, 100)
-
+    start_ang = track.get_start_ang()
     for car in range(car_num):
-        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10))
-
+        cars.append(car_o.Car(window, track_points[0], 10, start_ang))
     
     while action == "race":
         window.fill(const.COL["black"])
@@ -140,7 +140,7 @@ def race(window, clock, action, mouse_used):
                     quit()
  
         #Track Processing
-        track_1.render()
+        track.render()
 
         #Car Processing
         if simulating:
@@ -150,7 +150,7 @@ def race(window, clock, action, mouse_used):
                         car.find_distances()
                         car.inputs(frame_time)
                         car.dynamics(frame_time)
-                        car.find_progress(track_1)
+                        car.find_progress(track)
                         car.crash_check()
 
             for car in range(len(cars)):
@@ -176,7 +176,7 @@ def race(window, clock, action, mouse_used):
             
             top_cars = find_top_cars(cars)
             write_snapshot(top_cars)
-            cars = next_gen_cars(top_cars, window, cars)
+            cars = next_gen_cars(top_cars, window, cars, track)
 
             gen += 1
             simulating = True

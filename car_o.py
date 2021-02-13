@@ -41,7 +41,7 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, pos, size):
+    def __init__(self, window, pos, size, ang):
         self.window = window
         self.size = size
         self.crashed = False
