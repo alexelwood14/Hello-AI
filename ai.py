@@ -100,7 +100,7 @@ class Neural_Network():
         self.weights = []
         self.biases = []
         mean = 0
-        std_dev = 1
+        std_dev = 0.01
         self.layers = len(hidden) + 1
 
         #Initiate input nodes

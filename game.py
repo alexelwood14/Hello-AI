@@ -86,7 +86,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 50
+    car_num = 100
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -94,7 +94,7 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track3", asp_ratio)
+    track_points = get_track_points("track2", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     start_ang = track.get_start_ang()
