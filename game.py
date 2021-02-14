@@ -8,20 +8,21 @@ import map_o
 import pygame_ui
 from pygame.locals import *
 
-def find_top_cars(cars):
+def sort_cars(cars):
     temp_cars = cars[:]
-    top_cars = []
-    for i in range(len(cars)//10):
+    sorted_cars = []
+    for i in range(len(cars)):
         highest, index = find_top_car(temp_cars)
-        top_cars.append(highest)
+        sorted_cars.append(highest)
         temp_cars.pop(index)
+    sorted_cars.reverse()
 
-    return top_cars
+    return sorted_cars
 
 
 def find_top_car(cars):
     highest = cars[0]
-    index = -1
+    index = 0
     for car in range(len(cars)):
         if cars[car].get_progress() > highest.get_progress():
             highest = cars[car]
@@ -29,25 +30,33 @@ def find_top_car(cars):
 
     return highest, index
 
-
-def next_gen_cars(top_cars, window, cars, track):
+def next_gen_cars(window, cars, track):
     car_num = len(cars)
-    cars = []
+    
+    #Create an array of parents
+    parents = []
+    for i in range(int(car_num/5)):
+        parents.append(cars[int(4*car_num/5) + i])
+
+    #Copy cars to a new array
     asp_ratio = window.get_size()[1] / const.BASE_RES
     start_ang = track.get_start_ang()
-    for i in range(car_num):
-        cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10, start_ang))
+    new_cars = []
+    for car in range(car_num):
+        new_cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10, start_ang))
 
-    for i in range(10):
-        for car in range(len(top_cars)):
-            cars[(i * int(car_num/10)) + car].set_biases(top_cars[car].get_biases())
-            cars[(i * int(car_num/10)) + car].set_weights(top_cars[car].get_weights())
+    for car in range(car_num):
+        new_cars[car].set_biases(cars[car].get_biases())
+        new_cars[car].set_weights(cars[car].get_weights())        
+
+    #Replace least performing cars with children of parents and mutate
+    for car in range(len(parents)):
+        new_cars[car].set_biases(parents[car].get_biases())
+        new_cars[car].set_weights(parents[car].get_weights())
+        new_cars[car].mutate_biases()
+        new_cars[car].mutate_weights()
             
-    for car in range(int(9*car_num/10)):
-        cars[car].mutate_biases()
-        cars[car].mutate_weights()
-
-    return cars
+    return new_cars
 
 def get_track_points(file, asp_ratio):
     track_points = []
@@ -57,15 +66,15 @@ def get_track_points(file, asp_ratio):
         track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
     return track_points
 
-def write_snapshot(top_cars):
+def write_snapshot(cars):
     f = open("data\snapshot", "w")
     f.close()
     f = open("data\snapshot", "a")
 
-    for car in range(len(top_cars)):
+    for car in range(int(len(cars) - len(cars)/10), len(cars)):
         f.write("NETWORK_{}\n".format(car))
-        weights = top_cars[car].get_weights()
-        biases = top_cars[car].get_biases()
+        weights = cars[car].get_weights()
+        biases = cars[car].get_biases()
         f.write(str(weights))
         f.write("\n")
         f.write(str(biases))
@@ -170,9 +179,9 @@ def race(window, clock, action, mouse_used):
             f.write("\n")
             f.write(str(average_progress))
             
-            top_cars = find_top_cars(cars)
-            write_snapshot(top_cars)
-            cars = next_gen_cars(top_cars, window, cars, track)
+            cars = sort_cars(cars)
+            write_snapshot(cars)
+            cars = next_gen_cars(window, cars, track)
 
             gen += 1
             simulating = True
