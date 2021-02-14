@@ -101,7 +101,7 @@ def race(window, clock, action, mouse_used):
     for car in range(car_num):
         cars.append(car_o.Car(window, track_points[0], 10, start_ang))
     
-    while action == "race":
+    while action == const.MODE.RACE:
         window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
         if not paused:
@@ -133,7 +133,7 @@ def race(window, clock, action, mouse_used):
                     simulating = False
 
                 if event.key == K_m:
-                    action = "main"
+                    action = const.MODE.MAIN
                 
                 if event.key == K_ESCAPE:
                     pygame.quit()

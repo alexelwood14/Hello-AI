@@ -4,7 +4,12 @@ import numpy as np
 import pygame_ui
 import game
 import network
+import enum
 from pygame.locals import *
+
+class Hello_AI():
+    def __init__():
+        pass
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def init_objects(window):
@@ -78,7 +83,7 @@ def settings(window, resolution, action, buttons, mouse_used):
     used_buttons["back"].set_pos([resolution[0] / 5, start + incriment * 3])
 
     
-    while action == "settings":
+    while action == const.MODE.SETTINGS:
         #Reset mouse usage
         if not pygame.mouse.get_pressed()[0]:
             mouse_used = False
@@ -98,7 +103,7 @@ def settings(window, resolution, action, buttons, mouse_used):
         #process button presses
         if buttons["back"].highlight(mouse_used):
             mouse_used = True
-            action = "main"
+            action = const.MODE.MAIN
 
         elif used_buttons["res_up"].highlight(mouse_used):
             mouse_used = True
@@ -175,7 +180,7 @@ def main_menu(window, action, buttons, mouse_used):
 
     incriment_1 = window.get_size()[1] / 10
     
-    while action == "main":
+    while action == const.MODE.MAIN:
         #Reset mouse usage
         if not pygame.mouse.get_pressed()[0]:
             mouse_used = False
@@ -184,15 +189,14 @@ def main_menu(window, action, buttons, mouse_used):
 
         if buttons["settings"].highlight(mouse_used):
             mouse_used = True
-            action = "settings"
+            action = const.MODE.SETTINGS
 
         elif buttons["quit"].highlight(mouse_used):
-            pygame.quit()
-            quit()
+            action = const.MODE.QUIT
 
         elif buttons["start"].highlight(mouse_used):
             mouse_used = True
-            action = "race"
+            action = const.MODE.RACE
         
 
         for event in pygame.event.get():
@@ -239,17 +243,17 @@ def main():
     mouse_used = False
 
     buttons = init_objects(window)
-    action = "race"
+    action = const.MODE.RACE
     while True:
-        if action == "main":
+        if action == const.MODE.MAIN:
             action, mouse_used = main_menu(window, action, buttons, mouse_used)
-        elif action == "settings":
+        elif action == const.MODE.SETTINGS:
             action, mouse_used, window, resolution = settings(window, resolution, action, buttons, mouse_used)
-        elif action == "race":
+        elif action == const.MODE.RACE:
             action, mouse_used = game.race(window, clock, action, mouse_used)
-        elif action == "network":
+        elif action == const.MODE.NETWORK:
             action, mouse_used = network.network(window, clock, action, mouse_used)
-        else:
+        elif action == const.MODE.QUIT:
             pygame.quit()
             quit()
 
