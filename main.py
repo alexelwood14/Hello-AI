@@ -10,7 +10,7 @@ from pygame.locals import *
 class Hello_AI():
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.resolution, self.windowed = get_config()
+        self.resolution, self.windowed = self.get_config()
         pygame.init()
 
         if self.windowed:
@@ -37,6 +37,18 @@ class Hello_AI():
             elif self.mode == const.MODE.QUIT:
                 pygame.quit()
                 quit()
+
+
+    def get_config(self):
+        resolution = []
+        f = open("data\config", "r")
+        resolution.append(int(f.readline()))
+        resolution.append(int(f.readline()))
+        if f.readline() == "True":
+            windowed = True
+        else:
+            windowed = False
+        return resolution, windowed
                 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -245,20 +257,8 @@ def main_menu(window, action, buttons, mouse_used):
 
     return action, mouse_used
 
-def get_config():
-    resolution = []
-    f = open("data\config", "r")
-    resolution.append(int(f.readline()))
-    resolution.append(int(f.readline()))
-    if f.readline() == "True":
-        windowed = True
-    else:
-        windowed = False
-    return resolution, windowed
-
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
-
     program = Hello_AI() 
     program.run()
             
