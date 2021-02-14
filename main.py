@@ -8,8 +8,36 @@ import enum
 from pygame.locals import *
 
 class Hello_AI():
-    def __init__():
-        pass
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.resolution, self.windowed = get_config()
+        pygame.init()
+
+        if self.windowed:
+            self.window = pygame.display.set_mode((self.resolution[0], self.resolution[1]))
+        else:
+            self.window = pygame.display.set_mode((self.resolution[0], self.resolution[1]), pygame.FULLSCREEN)
+        pygame.display.set_caption('Hello-AI')
+
+        self.mouse_used = False
+
+        self.buttons = init_objects(self.window)
+        self.mode = const.MODE.RACE
+
+    def run(self):
+        while True:
+            if self.mode == const.MODE.MAIN:
+                self.mode, self.mouse_used = main_menu(self.window, self.mode, self.buttons, self.mouse_used)
+            elif self.mode == const.MODE.SETTINGS:
+                self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
+            elif self.mode == const.MODE.RACE:
+                self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.mouse_used)
+            elif self.mode == const.MODE.NETWORK:
+                self.mode, mouse_used = network.network(self.window, self.clock, self.mode, self.mouse_used)
+            elif self.mode == const.MODE.QUIT:
+                pygame.quit()
+                quit()
+                
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def init_objects(window):
@@ -231,33 +259,8 @@ def get_config():
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
 
-    clock = pygame.time.Clock()
-    resolution, windowed = get_config()
-    pygame.init()
-    if windowed:
-        window = pygame.display.set_mode((resolution[0], resolution[1]))
-    else:
-        window = pygame.display.set_mode((resolution[0], resolution[1]), pygame.FULLSCREEN)
-    pygame.display.set_caption('Physics')
-
-    mouse_used = False
-
-    buttons = init_objects(window)
-    action = const.MODE.RACE
-    while True:
-        if action == const.MODE.MAIN:
-            action, mouse_used = main_menu(window, action, buttons, mouse_used)
-        elif action == const.MODE.SETTINGS:
-            action, mouse_used, window, resolution = settings(window, resolution, action, buttons, mouse_used)
-        elif action == const.MODE.RACE:
-            action, mouse_used = game.race(window, clock, action, mouse_used)
-        elif action == const.MODE.NETWORK:
-            action, mouse_used = network.network(window, clock, action, mouse_used)
-        elif action == const.MODE.QUIT:
-            pygame.quit()
-            quit()
-
-        
+    program = Hello_AI() 
+    program.run()
             
 if __name__ == "__main__":
     main()

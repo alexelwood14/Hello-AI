@@ -8,10 +8,6 @@ import map_o
 import pygame_ui
 from pygame.locals import *
 
-def menu():
-    pass
-
-
 def find_top_cars(cars):
     temp_cars = cars[:]
     top_cars = []
