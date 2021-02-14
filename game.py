@@ -35,8 +35,8 @@ def next_gen_cars(window, cars, track):
     
     #Create an array of parents
     parents = []
-    for i in range(int(car_num/5)):
-        parents.append(cars[int(4*car_num/5) + i])
+    for i in range(int(3*car_num/10)):
+        parents.append(cars[int(7*car_num/10) + i])
 
     #Copy cars to a new array
     asp_ratio = window.get_size()[1] / const.BASE_RES
@@ -99,7 +99,7 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track2", asp_ratio)
+    track_points = get_track_points("track3", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     start_ang = track.get_start_ang()
