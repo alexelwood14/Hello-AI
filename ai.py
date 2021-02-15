@@ -312,16 +312,24 @@ class Neural_Network():
 
 
     def mutate_biases(self):
+        var = 1
+        std_dev = var**2 
         for layer in range(len(self.biases)):
             for bias in range(len(self.biases[layer])):
-                self.biases[layer][bias] = np.random.normal(self.biases[layer][bias], 0.5)
+                mutation = np.random.normal(0, std_dev)
+                if abs(mutation) > 2 * np.sqrt(std_dev): 
+                    self.biases[layer][bias] = mutation
 
 
     def mutate_weights(self):
+        var = 1
+        std_dev = var**2 
         for layer in range(len(self.weights)):
             for node in range(len(self.weights[layer])):
                 for w in range(len(self.weights[layer][node])):
-                    self.weights[layer][node][w] = np.random.normal(self.weights[layer][node][w], 0.1)
+                    mutation = np.random.normal(0, std_dev)
+                    if abs(mutation) > 2 * np.sqrt(std_dev):
+                        self.weights[layer][node][w] = mutation
 
         
     def get_weights(self):
