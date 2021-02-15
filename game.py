@@ -86,7 +86,6 @@ def write_snapshot(cars):
 def race(window, clock, action, mouse_used):
     paused = False
     display_debug = True
-    car_debug = False
     simulating = True
     gen_time = 0
     gen = 0
