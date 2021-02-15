@@ -4,7 +4,52 @@ import numpy as np
 import pygame_ui
 import game
 import network
+import enum
 from pygame.locals import *
+
+class Hello_AI():
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.resolution, self.windowed = self.get_config()
+        pygame.init()
+
+        if self.windowed:
+            self.window = pygame.display.set_mode((self.resolution[0], self.resolution[1]))
+        else:
+            self.window = pygame.display.set_mode((self.resolution[0], self.resolution[1]), pygame.FULLSCREEN)
+        pygame.display.set_caption('Hello-AI')
+
+        self.mouse_used = False
+
+        self.buttons = init_objects(self.window)
+        self.mode = const.MODE.RACE
+
+    def run(self):
+        while True:
+            if self.mode == const.MODE.MAIN:
+                self.mode, self.mouse_used = main_menu(self.window, self.mode, self.buttons, self.mouse_used)
+            elif self.mode == const.MODE.SETTINGS:
+                self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
+            elif self.mode == const.MODE.RACE:
+                self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.mouse_used)
+            elif self.mode == const.MODE.NETWORK:
+                self.mode, mouse_used = network.network(self.window, self.clock, self.mode, self.mouse_used)
+            elif self.mode == const.MODE.QUIT:
+                pygame.quit()
+                quit()
+
+
+    def get_config(self):
+        resolution = []
+        f = open("data\config", "r")
+        resolution.append(int(f.readline()))
+        resolution.append(int(f.readline()))
+        if f.readline() == "True":
+            windowed = True
+        else:
+            windowed = False
+        return resolution, windowed
+                
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def init_objects(window):
@@ -78,7 +123,7 @@ def settings(window, resolution, action, buttons, mouse_used):
     used_buttons["back"].set_pos([resolution[0] / 5, start + incriment * 3])
 
     
-    while action == "settings":
+    while action == const.MODE.SETTINGS:
         #Reset mouse usage
         if not pygame.mouse.get_pressed()[0]:
             mouse_used = False
@@ -98,7 +143,7 @@ def settings(window, resolution, action, buttons, mouse_used):
         #process button presses
         if buttons["back"].highlight(mouse_used):
             mouse_used = True
-            action = "main"
+            action = const.MODE.MAIN
 
         elif used_buttons["res_up"].highlight(mouse_used):
             mouse_used = True
@@ -175,7 +220,7 @@ def main_menu(window, action, buttons, mouse_used):
 
     incriment_1 = window.get_size()[1] / 10
     
-    while action == "main":
+    while action == const.MODE.MAIN:
         #Reset mouse usage
         if not pygame.mouse.get_pressed()[0]:
             mouse_used = False
@@ -184,15 +229,14 @@ def main_menu(window, action, buttons, mouse_used):
 
         if buttons["settings"].highlight(mouse_used):
             mouse_used = True
-            action = "settings"
+            action = const.MODE.SETTINGS
 
         elif buttons["quit"].highlight(mouse_used):
-            pygame.quit()
-            quit()
+            action = const.MODE.QUIT
 
         elif buttons["start"].highlight(mouse_used):
             mouse_used = True
-            action = "race"
+            action = const.MODE.RACE
         
 
         for event in pygame.event.get():
@@ -213,47 +257,10 @@ def main_menu(window, action, buttons, mouse_used):
 
     return action, mouse_used
 
-def get_config():
-    resolution = []
-    f = open("data\config", "r")
-    resolution.append(int(f.readline()))
-    resolution.append(int(f.readline()))
-    if f.readline() == "True":
-        windowed = True
-    else:
-        windowed = False
-    return resolution, windowed
-
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
-
-    clock = pygame.time.Clock()
-    resolution, windowed = get_config()
-    pygame.init()
-    if windowed:
-        window = pygame.display.set_mode((resolution[0], resolution[1]))
-    else:
-        window = pygame.display.set_mode((resolution[0], resolution[1]), pygame.FULLSCREEN)
-    pygame.display.set_caption('Physics')
-
-    mouse_used = False
-
-    buttons = init_objects(window)
-    action = "race"
-    while True:
-        if action == "main":
-            action, mouse_used = main_menu(window, action, buttons, mouse_used)
-        elif action == "settings":
-            action, mouse_used, window, resolution = settings(window, resolution, action, buttons, mouse_used)
-        elif action == "race":
-            action, mouse_used = game.race(window, clock, action, mouse_used)
-        elif action == "network":
-            action, mouse_used = network.network(window, clock, action, mouse_used)
-        else:
-            pygame.quit()
-            quit()
-
-        
+    program = Hello_AI() 
+    program.run()
             
 if __name__ == "__main__":
     main()

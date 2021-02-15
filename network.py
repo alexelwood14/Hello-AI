@@ -14,7 +14,7 @@ def network(window, clock, colours, resolution, action, mouse_used):
     network = ai.Neural_Network(window, colours, resolution, 6, [12,12], 6)
     network.process([random.random(),random.random(),random.random(),random.random(),random.random(),random.random()], True)
 
-    while action == "network":
+    while action == const.MODE.NETWORK:
         window.fill(colours["light_grey"])
         frame_time = clock.tick() / 1000
 
@@ -41,7 +41,7 @@ def network(window, clock, colours, resolution, action, mouse_used):
                         display_biases = True
 
                 if event.key == K_m:
-                    action = "main"
+                    action = const.MODE.MAIN
                 
                 if event.key == K_ESCAPE:
                     pygame.quit()

@@ -8,10 +8,6 @@ import map_o
 import pygame_ui
 from pygame.locals import *
 
-def menu():
-    pass
-
-
 def find_top_cars(cars):
     temp_cars = cars[:]
     top_cars = []
@@ -86,7 +82,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 50
+    car_num = 100
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -94,14 +90,14 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track3", asp_ratio)
+    track_points = get_track_points("track2", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     start_ang = track.get_start_ang()
     for car in range(car_num):
         cars.append(car_o.Car(window, track_points[0], 10, start_ang))
     
-    while action == "race":
+    while action == const.MODE.RACE:
         window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
         if not paused:
@@ -133,7 +129,7 @@ def race(window, clock, action, mouse_used):
                     simulating = False
 
                 if event.key == K_m:
-                    action = "main"
+                    action = const.MODE.MAIN
                 
                 if event.key == K_ESCAPE:
                     pygame.quit()
