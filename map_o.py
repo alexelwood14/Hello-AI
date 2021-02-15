@@ -82,6 +82,9 @@ class Map():
 
     def get_start_ang(self):
         return self.start_ang
+
+    def get_points(self):
+        return self.points
                 
 
         

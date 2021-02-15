@@ -43,7 +43,7 @@ def next_gen_cars(window, cars, track):
     start_ang = track.get_start_ang()
     new_cars = []
     for car in range(car_num):
-        new_cars.append(car_o.Car(window, [asp_ratio*300, asp_ratio*300], 10, start_ang))
+        new_cars.append(car_o.Car(window, track.get_points()[0], 10, start_ang))
 
     for car in range(car_num):
         new_cars[car].set_biases(cars[car].get_biases())
@@ -97,7 +97,7 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "a")
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track2", asp_ratio)
+    track_points = get_track_points("track3", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     start_ang = track.get_start_ang()
