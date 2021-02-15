@@ -414,6 +414,9 @@ class Car():
     def mutate_weights(self):
         self.ai.mutate_weights()
 
+    def crossover(self, parent1, parent2):
+        self.ai.crossover(parent1, parent2)
+
     def reset(self):
         asp_ratio = self.window.get_size()[1] / const.BASE_RES
         self.pos = asp_ratio * np.array([300, 300])
