@@ -35,11 +35,10 @@ def next_gen_cars(window, cars, track):
     
     #Create an array of parents
     parents = []
-    for i in range(int(3*car_num/10)):
-        parents.append(cars[int(7*car_num/10) + i])
+    for i in range(int(car_num/10)):
+        parents.append(cars[int(9*car_num/10) + i])
 
     #Copy cars to a new array
-    asp_ratio = window.get_size()[1] / const.BASE_RES
     start_ang = track.get_start_ang()
     new_cars = []
     for car in range(car_num):
@@ -50,11 +49,12 @@ def next_gen_cars(window, cars, track):
         new_cars[car].set_weights(cars[car].get_weights())        
 
     #Replace least performing cars with children of parents and mutate
-    for car in range(len(parents)):
-        new_cars[car].set_biases(parents[car].get_biases())
-        new_cars[car].set_weights(parents[car].get_weights())        
-        new_cars[car].mutate_biases()
-        new_cars[car].mutate_weights()
+    for i in range(3):
+        for car in range(len(parents)):
+            new_cars[car + (i*10)].set_biases(parents[car].get_biases())
+            new_cars[car + (i*10)].set_weights(parents[car].get_weights())        
+            new_cars[car + (i*10)].mutate_biases()
+            new_cars[car + (i*10)].mutate_weights()
             
     return new_cars
 
@@ -175,7 +175,7 @@ def race(window, clock, action, mouse_used):
 
                 average_progress += car.get_progress()
             average_progress /= len(cars)
-            
+
             f = open("data/average_progress", "a")
             f.write("\n")
             f.write(str(average_progress))
