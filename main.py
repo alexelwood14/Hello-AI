@@ -247,7 +247,7 @@ def main_menu(window, action, buttons, mouse_used):
 
         for button in used_buttons:
             used_buttons[button].render()
-            
+                
 
         window.blit(image, [window.get_size()[0] - window.get_size()[1]*1.1, 0])
         pygame_ui.draw_text(window, 'Artificial', [window.get_size()[0]/5, window.get_size()[1]/10.8], int(window.get_size()[1] / 10.5), const.COL["white"], 'impact', 'c')
