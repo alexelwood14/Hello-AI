@@ -41,7 +41,7 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, pos, size):
+    def __init__(self, window, pos, size, ang):
         self.window = window
         self.size = size
         self.crashed = False
@@ -49,14 +49,14 @@ class Car():
         self.manual = False
 
         #Setup AI
-        self.ai = ai.Neural_Network(window, 7, [10], 4)
+        self.ai = ai.Neural_Network(window, 9, [10, 10], 4)
 
         #Setup dynamic attributes
         self.pos = np.array(pos)
         self.speed = 0.0
         self.vel = np.array([0.0,0.0])
         self.acc = 0.0
-        self.term_speed = 300*window.get_size()[1]/const.BASE_RES 
+        self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
         self.ang = math.pi * 3 / 2
         self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
@@ -98,6 +98,10 @@ class Car():
         self.anti_rear_norm = np.transpose(self.anti_rear_norm)
         self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
         self.direcion_norm = np.transpose(self.direcion_norm)
+        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
+        self.ne_ray = np.transpose(self.ne_ray)
+        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
+        self.nw_ray = np.transpose(self.nw_ray)
 
         #Set location of wheels
         self.wheels = []
@@ -173,7 +177,7 @@ class Car():
             wheel_left = self.wheel_ang / self.max_wheel_ang
             
         inputs = self.ai.process([speed_forwards, speed_backwards, wheel_right, wheel_left,
-                                  self.forward_dist, self.right_dist, self.left_dist])
+                                  self.forward_dist, self.right_dist, self.left_dist, self.ne_dist, self.nw_dist])
 
         self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
@@ -221,6 +225,10 @@ class Car():
         self.anti_rear_norm = np.transpose(self.anti_rear_norm)
         self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
         self.direcion_norm = np.transpose(self.direcion_norm)
+        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
+        self.ne_ray = np.transpose(self.ne_ray)
+        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
+        self.nw_ray = np.transpose(self.nw_ray)
 
         #Find turing point
         if (self.rear_norm[0] * self.front_norm[1] - self.rear_norm[1] * self.front_norm[0]) != 0:
@@ -301,20 +309,28 @@ class Car():
 
 
     def find_distances(self):
-        #Calculate distnace to wall in front of car
+        #Calculate distance to wall in front of car
         forward_pos = self.iterate_distance(self.direcion_norm, self.pos, const.COL["light_grey"][0], 100, 1)
         vector = self.pos - forward_pos
-        self.forward_dist = np.sqrt((vector).dot(vector)) / 2000
+        self.forward_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
         
-        #Calculate distnace to wall left of car
+        #Calculate distance to wall left of car
         left_pos = self.iterate_distance(self.rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
         vector = self.pos - left_pos
-        self.left_dist = np.sqrt((vector).dot(vector)) / 2000
+        self.left_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
         
-        #Calculate distnace to wall right of car
+        #Calculate distance to wall right of car
         right_pos = self.iterate_distance(self.anti_rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
         vector = self.pos - right_pos
-        self.right_dist = np.sqrt((vector).dot(vector)) / 2000
+        self.right_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
+
+        ne_pos = self.iterate_distance(self.ne_ray, self.pos, const.COL["light_grey"][0], 10, 1)
+        vector = self.pos - ne_pos
+        self.ne_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
+
+        nw_pos = self.iterate_distance(self.nw_ray, self.pos, const.COL["light_grey"][0], 10, 1)
+        vector = self.pos - nw_pos
+        self.nw_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
 
 
     #Recursive method for finding the distance from the car to a wall
@@ -398,6 +414,9 @@ class Car():
     def mutate_weights(self):
         self.ai.mutate_weights()
 
+    def crossover(self, parent1, parent2):
+        self.ai.crossover(parent1, parent2)
+
     def reset(self):
         asp_ratio = self.window.get_size()[1] / const.BASE_RES
         self.pos = asp_ratio * np.array([300, 300])
@@ -439,6 +458,10 @@ class Car():
         self.anti_rear_norm = np.transpose(self.anti_rear_norm)
         self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
         self.direcion_norm = np.transpose(self.direcion_norm)
+        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
+        self.ne_ray = np.transpose(self.ne_ray)
+        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
+        self.nw_ray = np.transpose(self.nw_ray)
 
         #Set location of wheels
         self.wheels = []

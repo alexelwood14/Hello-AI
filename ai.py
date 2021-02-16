@@ -100,7 +100,7 @@ class Neural_Network():
         self.weights = []
         self.biases = []
         mean = 0
-        std_dev = 1
+        std_dev = 0.1
         self.layers = len(hidden) + 1
 
         #Initiate input nodes
@@ -287,20 +287,49 @@ class Neural_Network():
 
     def set_biases(self, biases):
         for layer in range(len(biases)):
-            self.biases[layer] = biases[layer][:]
+            for b in range(len(biases[layer])):
+                self.biases[layer][b] = biases[layer][b]
 
-
-    def mutate_biases(self):
+    def crossover(self, parent1, parent2):
+        biases1 = parent1.get_biases()
+        biases2 = parent2.get_biases()
         for layer in range(len(self.biases)):
             for bias in range(len(self.biases[layer])):
-                self.biases[layer][bias] = np.random.normal(self.biases[layer][bias], 0.2)
+                if layer*bias % 2 == 0:
+                    self.biases[layer][bias] = biases1[layer][bias]
+                else:
+                    self.biases[layer][bias] = biases2[layer][bias]
 
-
-    def mutate_weights(self):
+        weights1 = parent1.get_weights()
+        weights2 = parent2.get_weights()
         for layer in range(len(self.weights)):
             for node in range(len(self.weights[layer])):
                 for w in range(len(self.weights[layer][node])):
-                    self.weights[layer][node][w] = np.random.normal(self.weights[layer][node][w], 0.2)
+                    if layer*node % 2 == 0:
+                        self.weights[layer][node][w] = weights1[layer][node][w]
+                    else:
+                        self.weights[layer][node][w] = weights2[layer][node][w]
+
+
+    def mutate_biases(self):
+        var = 1
+        std_dev = var**2 
+        for layer in range(len(self.biases)):
+            for bias in range(len(self.biases[layer])):
+                mutation = np.random.normal(0, std_dev)
+                if abs(mutation) > 2 * np.sqrt(std_dev): 
+                    self.biases[layer][bias] += mutation
+
+
+    def mutate_weights(self):
+        var = 1
+        std_dev = var**2 
+        for layer in range(len(self.weights)):
+            for node in range(len(self.weights[layer])):
+                for w in range(len(self.weights[layer][node])):
+                    mutation = np.random.normal(0, std_dev)
+                    if abs(mutation) > 2 * np.sqrt(std_dev):
+                        self.weights[layer][node][w] += mutation
 
         
     def get_weights(self):

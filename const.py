@@ -1,3 +1,5 @@
+from enum import Enum
+
 BASE_RES = 1080
 
 COL = {"white" : [255,255,255],
@@ -13,3 +15,5 @@ COL = {"white" : [255,255,255],
         "purple" : [102, 0, 102],
         "dark_green" : [0, 102, 0],
         "orange" : [255,102,0]}
+
+MODE = Enum('MODE', 'MAIN SETTINGS RACE NETWORK QUIT')
