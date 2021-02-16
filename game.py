@@ -51,7 +51,8 @@ def next_gen_cars(window, cars, track):
 
     #Replace least performing cars with children of parents and mutate
     for car in range(len(parents)):
-        new_cars[car].crossover(parents[car], parents[len(parents)-1-car])
+        new_cars[car].set_biases(parents[car].get_biases())
+        new_cars[car].set_weights(parents[car].get_weights())        
         new_cars[car].mutate_biases()
         new_cars[car].mutate_weights()
             
@@ -94,7 +95,7 @@ def race(window, clock, action, mouse_used):
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
     f.close()
-    f = open("data/average_progress", "a")
+    
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
     track_points = get_track_points("track3", asp_ratio)
@@ -174,8 +175,11 @@ def race(window, clock, action, mouse_used):
 
                 average_progress += car.get_progress()
             average_progress /= len(cars)
+            
+            f = open("data/average_progress", "a")
             f.write("\n")
             f.write(str(average_progress))
+            f.close()
             
             cars = sort_cars(cars)
             write_snapshot(cars)
@@ -195,7 +199,7 @@ def race(window, clock, action, mouse_used):
 
         pygame.display.update()
         
-    f.close()
+    
     return action, mouse_used
 
 #----------------------------------------------------------------------------------------------------------------------------------
