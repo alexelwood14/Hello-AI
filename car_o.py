@@ -386,56 +386,6 @@ class Car():
 
     def crossover(self, parent1, parent2):
         self.ai.crossover(parent1, parent2)
-
-    def reset(self):
-        asp_ratio = self.window.get_size()[1] / const.BASE_RES
-        self.pos = asp_ratio * np.array([300, 300])
-        self.speed = 0.0
-        self.vel = np.array([0.0,0.0])
-        self.acc = 0.0
-        self.wheel_vel = 0.0
-        self.wheel_ang = 0.00001
-
-        #Setup geometry matrix
-        self.points_mat = np.array([[- self.size, - self.size*2.5],
-                                    [+ self.size, - self.size*2.5],
-                                    [+ self.size, + self.size*2.5],
-                                    [- self.size, + self.size*2.5]])
-        self.points_mat = np.matmul(self.ang_mat, np.transpose(self.points_mat))
-        self.points_mat = np.transpose(self.points_mat)
-        self.points_mat = np.array([[self.pos[0] + self.points_mat[0][0], self.pos[1] + self.points_mat[0][1]],
-                                    [self.pos[0] + self.points_mat[1][0], self.pos[1] + self.points_mat[1][1]],
-                                    [self.pos[0] + self.points_mat[2][0], self.pos[1] + self.points_mat[2][1]],
-                                    [self.pos[0] + self.points_mat[3][0], self.pos[1] + self.points_mat[3][1]]])
-
-        #Default wheel positions
-        self.wheel_pos = np.array([[-self.size,-self.size*1.6],
-                                    [ self.size, -self.size*1.6],
-                                    [ self.size, self.size*1.6],
-                                    [-self.size, self.size*1.6],
-                                    [0, self.size*1.6],
-                                    [0, -self.size*1.6]])
-
-        #Setup steering normals
-        self.front_axel = self.pos + np.matrix([[0.0], [self.size * 1.6]])
-        self.rear_axel = self.pos + np.matrix([[0.0], [-self.size * 1.6]])
-        self.turning_point = np.matrix([[0.0], [0.0]])
-
-        #Setup normals
-        self.front_norm = np.matmul(self.ang_mat, np.matrix([[1.0], [0.0]]))
-        self.rear_norm = np.matmul(self.ang_mat, np.matrix([[1.0], [0.0]]))
-        self.anti_rear_norm = np.matmul(self.ang_mat, np.matrix([[-1.0], [0.0]]))
-        self.direcion_norm = np.matmul(self.ang_mat, np.matrix([[0.0], [1.0]]))
-        self.ne_ray = np.matmul(self.ang_mat, np.matrix([[1.0], [1.0]]))
-        self.nw_ray = np.matmul(self.ang_mat, np.matrix([[-1.0], [1.0]]))
-
-        #Set location of wheels
-        self.wheels = []
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], self.size / 3))
-            
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
