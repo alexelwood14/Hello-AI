@@ -11,31 +11,28 @@ class Wheel():
         self.window = window
         self.colour = colour
         self.size = size
-        
-        self.pos = np.array(pos)
-
+        self.pos = np.array([[pos[0]],
+                              [pos[1]]])
         self.ang = 0.0
         self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                [math.sin(self.ang), math.cos(self.ang)]])
+                              [math.sin(self.ang),  math.cos(self.ang)]])
 
-        self.points_mat = np.array([[-self.size / 2, -self.size],
-                                    [self.size / 2, -self.size],
-                                    [self.size / 2, self.size],
-                                    [-self.size / 2, self.size]])
+        self.points_mat = np.array([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
+                                     [-self.size,     -self.size,     self.size,      self.size]])
 
     def render(self):
-        points = np.matmul(self.mat, np.transpose(self.points_mat))
-        points = np.transpose(points)
-        pygame.draw.polygon(self.window, self.colour, points + self.pos)
+        points = np.asarray(np.transpose(np.matmul(self.mat, self.points_mat) + self.pos))
+        pygame.draw.polygon(self.window, self.colour, points)
 
 
     def set_pos(self, pos):
-        self.pos = pos
+        self.pos = np.array([[pos[0]],
+                              [pos[1]]])
 
     def set_ang(self, ang):
         self.ang = ang
         self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                [math.sin(self.ang), math.cos(self.ang)]])
+                              [math.sin(self.ang),  math.cos(self.ang)]])
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -49,66 +46,50 @@ class Car():
         self.manual = False
 
         #Setup AI
-        self.ai = ai.Neural_Network(window, 9, [10, 10], 4)
+        self.ai = ai.Neural_Network(window, 9, [10], 4)
 
         #Setup dynamic attributes
-        self.pos = np.array(pos)
+        self.pos = pos
         self.speed = 0.0
-        self.vel = np.array([0.0,0.0])
+        self.vel = np.array([[0.0],[0.0]])
         self.acc = 0.0
         self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
         self.ang = math.pi * 3 / 2
         self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                   [math.sin(self.ang), math.cos(self.ang)]])
+                                 [math.sin(self.ang),  math.cos(self.ang)]])
 
         self.wheel_vel = 0.0
         self.wheel_ang = 0.00001
-        self.max_wheel_ang = math.pi/6
+        self.max_wheel_ang = math.pi/4
 
         #Setup geometry matrix
-        self.points_mat = np.array([[- self.size, - self.size*2.5],
-                                    [+ self.size, - self.size*2.5],
-                                    [+ self.size, + self.size*2.5],
-                                    [- self.size, + self.size*2.5]])
-        self.points_mat = np.matmul(self.ang_mat, np.transpose(self.points_mat))
-        self.points_mat = np.transpose(self.points_mat)
-        self.points_mat = np.array([[self.pos[0] + self.points_mat[0][0], self.pos[1] + self.points_mat[0][1]],
-                                    [self.pos[0] + self.points_mat[1][0], self.pos[1] + self.points_mat[1][1]],
-                                    [self.pos[0] + self.points_mat[2][0], self.pos[1] + self.points_mat[2][1]],
-                                    [self.pos[0] + self.points_mat[3][0], self.pos[1] + self.points_mat[3][1]]])
+        self.points_mat = np.array([[-self.size,      self.size,     self.size,    -self.size],
+                                     [-self.size*2.5, -self.size*2.5, self.size*2.5, self.size*2.5]])
+        self.points_mat = np.matmul(self.ang_mat, self.points_mat)
+        self.points_mat += self.pos
 
         #Default wheel positions
-        self.wheel_pos = np.array([[-self.size,-self.size*1.6],
-                                    [ self.size, -self.size*1.6],
-                                    [ self.size, self.size*1.6],
-                                    [-self.size, self.size*1.6],
-                                    [0, self.size*1.6],
-                                    [0, -self.size*1.6]])
+        self.wheel_pos = np.array([[-self.size,      self.size,     self.size,    -self.size,     0,              0], 
+                                    [-self.size*1.6, -self.size*1.6, self.size*1.6, self.size*1.6, self.size*1.6, -self.size*1.6]])
 
         #Setup steering normals
-        self.front_axel = np.array([self.pos[0], self.pos[1]  + self.size * 1.6])
-        self.rear_axel = np.array([self.pos[0], self.pos[1]  - self.size * 1.6])
-        self.turning_point = np.array([0.0,0.0])
+        self.front_axel = self.pos + np.array([[0.0], [self.size * 1.6]])
+        self.rear_axel = self.pos + np.array([[0.0], [-self.size * 1.6]])
+        self.turning_point = np.array([[0.0], [0.0]])
 
         #Setup normals
-        self.rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 0.0])))
-        self.rear_norm = np.transpose(self.rear_norm)
-        self.anti_rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 0.0])))
-        self.anti_rear_norm = np.transpose(self.anti_rear_norm)
-        self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
-        self.direcion_norm = np.transpose(self.direcion_norm)
-        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
-        self.ne_ray = np.transpose(self.ne_ray)
-        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
-        self.nw_ray = np.transpose(self.nw_ray)
+        self.front_norm = np.matmul(self.ang_mat, np.array([[1.0], [0.0]]))
+        #[direction norm, rear norm, anti rear norm, ne_ray, nw_ray]
+        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0, -1.0], 
+                                                          [1.0, 0.0,  0.0, -1.0,  1.0]]))
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) + self.size * 1.6], size / 3))
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -163,21 +144,21 @@ class Car():
         #Calculate network speed inputs
         if self.speed >= 0:
             speed_forwards = self.speed / self.term_speed
-            speed_backwards = 0
+            speed_backwards = 0.0
         else:
-            speed_forwards = 0
+            speed_forwards = 0.0
             speed_backwards = self.speed / self.term_speed/3
 
         #Calculate network turning inputs
         if self.wheel_ang >= 0:
             wheel_right = self.wheel_ang / self.max_wheel_ang
-            wheel_left = 0
+            wheel_left = 0.0
         else:
-            wheel_right = 0
+            wheel_right = 0.0
             wheel_left = self.wheel_ang / self.max_wheel_ang
             
         inputs = self.ai.process([speed_forwards, speed_backwards, wheel_right, wheel_left,
-                                  self.forward_dist, self.right_dist, self.left_dist, self.ne_dist, self.nw_dist])
+                                  self.distances[0], self.distances[1], self.distances[2], self.distances[3], self.distances[4]])
 
         self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
@@ -205,49 +186,38 @@ class Car():
 
     def dynamics(self, frame_time):  
         #Recalculate wheel positions
-        wheel_pos = np.matmul(self.ang_mat, np.transpose(self.wheel_pos))
-        wheel_pos = np.transpose(wheel_pos)
+        wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
 
         #Find axel pivot points
-        self.front_axel = wheel_pos[4]
-        self.rear_axel = wheel_pos[5]
+        self.front_axel = wheel_pos[:, [4]]
+        self.rear_axel = wheel_pos[:, [5]]
 
         #Recalculate wheel matrix
         self.front_mat = np.array([[math.cos(self.wheel_ang + self.ang), -math.sin(self.wheel_ang + self.ang)],
                                 [math.sin(self.wheel_ang + self.ang), math.cos(self.wheel_ang + self.ang)]])
         
         #Calculate wheel normals and direction normal
-        self.front_norm = np.matmul(self.front_mat, np.transpose(np.array([1.0, 0.0])))
-        self.front_norm = np.transpose(self.front_norm)
-        self.rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 0.0])))
-        self.rear_norm = np.transpose(self.rear_norm)
-        self.anti_rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 0.0])))
-        self.anti_rear_norm = np.transpose(self.anti_rear_norm)
-        self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
-        self.direcion_norm = np.transpose(self.direcion_norm)
-        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
-        self.ne_ray = np.transpose(self.ne_ray)
-        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
-        self.nw_ray = np.transpose(self.nw_ray)
+        self.front_norm = np.matmul(self.front_mat, np.array([[1.0], [0.0]]))
+        #[direction norm, rear norm, anti rear norm, ne_ray, nw_ray]
+        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0, -1.0], 
+                                                          [1.0, 0.0,  0.0, -1.0,  1.0]]))
 
         #Find turing point
-        if (self.rear_norm[0] * self.front_norm[1] - self.rear_norm[1] * self.front_norm[0]) != 0:
-            mu = ((self.rear_norm[0]*(self.rear_axel[1] - self.front_axel[1]) - self.rear_norm[1]*(self.rear_axel[0] - self.front_axel[0]))
-                  / (self.rear_norm[0] * self.front_norm[1] - self.rear_norm[1] * self.front_norm[0]))
+        if (self.normals.item((0, 1)) * self.front_norm.item(1) - self.normals.item((1, 1)) * self.front_norm.item(0)) != 0:
+            mu = ((self.normals.item((0, 1))*(self.rear_axel.item(1) - self.front_axel.item(1)) - self.normals.item((1, 1))*(self.rear_axel.item(0) - self.front_axel.item(0)))
+                  / (self.normals.item((0, 1)) * self.front_norm.item(1) - self.normals.item((1, 1)) * self.front_norm.item(0)))
             self.turning_point = self.front_axel + mu * self.front_norm + self.pos
         else:
             mu = 100000
             self.turning_point = self.rear_axel + mu * self.rear_norm + self.pos
 
         #Move car geomery away from turning point
-        self.points_mat = np.array([[self.points_mat[0][0] - self.turning_point[0], self.points_mat[0][1] - self.turning_point[1]],
-                                    [self.points_mat[1][0] - self.turning_point[0], self.points_mat[1][1] - self.turning_point[1]],
-                                    [self.points_mat[2][0] - self.turning_point[0], self.points_mat[2][1] - self.turning_point[1]],
-                                    [self.points_mat[3][0] - self.turning_point[0], self.points_mat[3][1] - self.turning_point[1]]])
-         
+        self.points_mat = self.points_mat - self.turning_point
+
         
         #Calculate rotation angle
-        radius = np.sqrt((self.pos - self.turning_point).dot(self.pos - self.turning_point))
+        vector = self.pos - self.turning_point
+        radius = (np.sqrt(np.matmul(np.transpose(vector), vector))).item()
         self.speed += self.acc * frame_time
         displacement = self.speed * frame_time
         angle = displacement / radius
@@ -260,28 +230,23 @@ class Car():
                                     [math.sin(angle), math.cos(angle)]])
 
         #Apply translation matrix
-        self.points_mat = np.matmul(translation_mat, np.transpose(self.points_mat))
-        self.points_mat = np.transpose(self.points_mat)
+        self.points_mat = np.matmul(translation_mat, self.points_mat)
 
         #Move car geometry back from turning point
-        self.points_mat = np.array([[self.points_mat[0][0] + self.turning_point[0], self.points_mat[0][1] + self.turning_point[1]],
-                                    [self.points_mat[1][0] + self.turning_point[0], self.points_mat[1][1] + self.turning_point[1]],
-                                    [self.points_mat[2][0] + self.turning_point[0], self.points_mat[2][1] + self.turning_point[1]],
-                                    [self.points_mat[3][0] + self.turning_point[0], self.points_mat[3][1] + self.turning_point[1]]])
+        self.points_mat = self.points_mat + self.turning_point
 
-
-        self.pos = np.array([(self.points_mat[0][0] + self.points_mat[1][0] + self.points_mat[2][0] + self.points_mat[3][0]) / 4,
-                             (self.points_mat[0][1] + self.points_mat[1][1] + self.points_mat[2][1] + self.points_mat[3][1]) / 4])
+        #Update position based on average points
+        self.pos = np.array([[(self.points_mat.item((0,0)) + self.points_mat.item((0,1)) + self.points_mat.item((0,2)) + self.points_mat.item((0,3))) / 4],
+                              [(self.points_mat.item((1,0)) + self.points_mat.item((1,1)) + self.points_mat.item((1,2)) + self.points_mat.item((1,3))) / 4]])
 
         #Recalculate wheel positions
-        wheel_pos = np.matmul(self.ang_mat, np.transpose(self.wheel_pos))
-        wheel_pos = np.transpose(wheel_pos)
+        wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
         
         #Apply new wheel_positions
-        self.wheels[0].set_pos([wheel_pos[0][0] + self.pos[0], wheel_pos[0][1] + self.pos[1]])
-        self.wheels[1].set_pos([wheel_pos[1][0] + self.pos[0], wheel_pos[1][1] + self.pos[1]])
-        self.wheels[2].set_pos([wheel_pos[2][0] + self.pos[0], wheel_pos[2][1] + self.pos[1]])
-        self.wheels[3].set_pos([wheel_pos[3][0] + self.pos[0], wheel_pos[3][1] + self.pos[1]])
+        self.wheels[0].set_pos([wheel_pos.item((0,0)) + self.pos.item(0), wheel_pos.item((1,0)) + self.pos.item(1)])
+        self.wheels[1].set_pos([wheel_pos.item((0,1)) + self.pos.item(0), wheel_pos.item((1,1)) + self.pos.item(1)])
+        self.wheels[2].set_pos([wheel_pos.item((0,2)) + self.pos.item(0), wheel_pos.item((1,2)) + self.pos.item(1)])
+        self.wheels[3].set_pos([wheel_pos.item((0,3)) + self.pos.item(0), wheel_pos.item((1,3)) + self.pos.item(1)])
 
         #Apply new wheel rotations
         self.wheels[0].set_ang(self.ang)
@@ -294,52 +259,35 @@ class Car():
         for wheel in self.wheels:
             wheel.render()
 
-        pygame.draw.polygon(self.window, const.COL["red"], self.points_mat)
+        points = np.asarray(np.transpose(self.points_mat))
+        pygame.draw.polygon(self.window, const.COL["red"], points)
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
     def crash_check(self):
-        if (self.window.get_at([int(self.points_mat[0][0]), int(self.points_mat[0][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[1][0]), int(self.points_mat[1][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[2][0]), int(self.points_mat[2][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[3][0]), int(self.points_mat[3][1])])[0] == 0):
+        if (self.window.get_at([int(self.points_mat.item((0,0))), int(self.points_mat.item((1,0)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,1))), int(self.points_mat.item((1,1)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,2))), int(self.points_mat.item((1,2)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,3))), int(self.points_mat.item((1,3)))])[0] == 0):
             self.crashed = True
         else:
             self.crashed = False
 
 
     def find_distances(self):
-        #Calculate distance to wall in front of car
-        forward_pos = self.iterate_distance(self.direcion_norm, self.pos, const.COL["light_grey"][0], 100, 1)
-        vector = self.pos - forward_pos
-        self.forward_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
-        
-        #Calculate distance to wall left of car
-        left_pos = self.iterate_distance(self.rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
-        vector = self.pos - left_pos
-        self.left_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
-        
-        #Calculate distance to wall right of car
-        right_pos = self.iterate_distance(self.anti_rear_norm, self.pos, const.COL["light_grey"][0], 10, 1)
-        vector = self.pos - right_pos
-        self.right_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
-
-        ne_pos = self.iterate_distance(self.ne_ray, self.pos, const.COL["light_grey"][0], 10, 1)
-        vector = self.pos - ne_pos
-        self.ne_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
-
-        nw_pos = self.iterate_distance(self.nw_ray, self.pos, const.COL["light_grey"][0], 10, 1)
-        vector = self.pos - nw_pos
-        self.nw_dist = np.sqrt((vector).dot(vector)) / const.BASE_RES
-
+        self.distances = []
+        for i in range(np.shape(self.normals)[1]):
+            pos = self.iterate_distance(self.normals[:, [i]], self.pos, const.COL["light_grey"][0], 20, 1)
+            vector = self.pos - pos
+            self.distances.append((np.sqrt(np.matmul(np.transpose(vector), vector)) / const.BASE_RES).item())
 
     #Recursive method for finding the distance from the car to a wall
     def iterate_distance(self, vector, start_pos, start_colour, incriment_length, direction):
 
         #Stopping condition is that the inctiment is less than 1 pixel
         if incriment_length > 1:
-            if start_pos[0] < self.window.get_size()[0] and start_pos[0] >= 0 and start_pos[1] < self.window.get_size()[1] and start_pos[1] >= 0: 
-                colour = self.window.get_at([int(start_pos[0]), int(start_pos[1])])[0]
+            if start_pos.item(0) < self.window.get_size()[0] and start_pos.item(0) >= 0 and start_pos.item(1) < self.window.get_size()[1] and start_pos.item(1) >= 0: 
+                colour = self.window.get_at([int(start_pos.item(0)), int(start_pos.item(1))])[0]
             else:
                 colour = 0
 
@@ -416,60 +364,6 @@ class Car():
 
     def crossover(self, parent1, parent2):
         self.ai.crossover(parent1, parent2)
-
-    def reset(self):
-        asp_ratio = self.window.get_size()[1] / const.BASE_RES
-        self.pos = asp_ratio * np.array([300, 300])
-        self.speed = 0.0
-        self.vel = np.array([0.0,0.0])
-        self.acc = 0.0
-        self.wheel_vel = 0.0
-        self.wheel_ang = 0.00001
-
-        #Setup geometry matrix
-        self.points_mat = np.array([[- self.size, - self.size*2.5],
-                                    [+ self.size, - self.size*2.5],
-                                    [+ self.size, + self.size*2.5],
-                                    [- self.size, + self.size*2.5]])
-        self.points_mat = np.matmul(self.ang_mat, np.transpose(self.points_mat))
-        self.points_mat = np.transpose(self.points_mat)
-        self.points_mat = np.array([[self.pos[0] + self.points_mat[0][0], self.pos[1] + self.points_mat[0][1]],
-                                    [self.pos[0] + self.points_mat[1][0], self.pos[1] + self.points_mat[1][1]],
-                                    [self.pos[0] + self.points_mat[2][0], self.pos[1] + self.points_mat[2][1]],
-                                    [self.pos[0] + self.points_mat[3][0], self.pos[1] + self.points_mat[3][1]]])
-
-        #Default wheel positions
-        self.wheel_pos = np.array([[-self.size,-self.size*1.6],
-                                    [ self.size, -self.size*1.6],
-                                    [ self.size, self.size*1.6],
-                                    [-self.size, self.size*1.6],
-                                    [0, self.size*1.6],
-                                    [0, -self.size*1.6]])
-
-        #Setup steering normals
-        self.front_axel = np.array([self.pos[0], self.pos[1]  + self.size * 1.6])
-        self.rear_axel = np.array([self.pos[0], self.pos[1]  - self.size * 1.6])
-        self.turning_point = np.array([0.0,0.0])
-
-        #Setup normals
-        self.rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 0.0])))
-        self.rear_norm = np.transpose(self.rear_norm)
-        self.anti_rear_norm = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 0.0])))
-        self.anti_rear_norm = np.transpose(self.anti_rear_norm)
-        self.direcion_norm = np.matmul(self.ang_mat, np.transpose(np.array([0.0, 1.0])))
-        self.direcion_norm = np.transpose(self.direcion_norm)
-        self.ne_ray = np.matmul(self.ang_mat, np.transpose(np.array([1.0, 1.0])))
-        self.ne_ray = np.transpose(self.ne_ray)
-        self.nw_ray = np.matmul(self.ang_mat, np.transpose(np.array([-1.0, 1.0])))
-        self.nw_ray = np.transpose(self.nw_ray)
-
-        #Set location of wheels
-        self.wheels = []
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], self.size / 3))
-        self.wheels.append(Wheel(self.window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], self.size / 3))
-            
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
