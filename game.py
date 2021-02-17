@@ -1,7 +1,6 @@
 import const
 import time
 import pygame
-import math
 import numpy as np
 import car_o
 import map_o

@@ -1,6 +1,5 @@
 import const
 import pygame
-import math
 import map_o
 import ai
 import numpy as np
@@ -14,8 +13,8 @@ class Wheel():
         self.pos = np.array([[pos[0]],
                               [pos[1]]])
         self.ang = 0.0
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                              [math.sin(self.ang),  math.cos(self.ang)]])
+        self.mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                              [np.sin(self.ang),  np.cos(self.ang)]])
 
         self.points_mat = np.array([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
                                      [-self.size,     -self.size,     self.size,      self.size]])
@@ -31,8 +30,8 @@ class Wheel():
 
     def set_ang(self, ang):
         self.ang = ang
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                              [math.sin(self.ang),  math.cos(self.ang)]])
+        self.mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                              [np.sin(self.ang),  np.cos(self.ang)]])
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -55,13 +54,13 @@ class Car():
         self.acc = 0.0
         self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
-        self.ang = math.pi * 3 / 2
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                 [math.sin(self.ang),  math.cos(self.ang)]])
+        self.ang = np.pi * 3 / 2
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                 [np.sin(self.ang),  np.cos(self.ang)]])
 
         self.wheel_vel = 0.0
         self.wheel_ang = 0.00001
-        self.max_wheel_ang = math.pi/4
+        self.max_wheel_ang = np.pi/4
 
         #Setup geometry matrix
         self.points_mat = np.array([[-self.size,      self.size,     self.size,    -self.size],
@@ -193,8 +192,8 @@ class Car():
         self.rear_axel = wheel_pos[:, [5]]
 
         #Recalculate wheel matrix
-        self.front_mat = np.array([[math.cos(self.wheel_ang + self.ang), -math.sin(self.wheel_ang + self.ang)],
-                                [math.sin(self.wheel_ang + self.ang), math.cos(self.wheel_ang + self.ang)]])
+        self.front_mat = np.array([[np.cos(self.wheel_ang + self.ang), -np.sin(self.wheel_ang + self.ang)],
+                                [np.sin(self.wheel_ang + self.ang), np.cos(self.wheel_ang + self.ang)]])
         
         #Calculate wheel normals and direction normal
         self.front_norm = np.matmul(self.front_mat, np.array([[1.0], [0.0]]))
@@ -224,10 +223,10 @@ class Car():
         if self.wheel_ang < 0:
             angle *= -1
         self.ang += angle
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                 [math.sin(self.ang), math.cos(self.ang)]])
-        translation_mat = np.array([[math.cos(angle), -math.sin(angle)],
-                                    [math.sin(angle), math.cos(angle)]])
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                 [np.sin(self.ang), np.cos(self.ang)]])
+        translation_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                                    [np.sin(angle), np.cos(angle)]])
 
         #Apply translation matrix
         self.points_mat = np.matmul(translation_mat, self.points_mat)
@@ -236,8 +235,7 @@ class Car():
         self.points_mat = self.points_mat + self.turning_point
 
         #Update position based on average points
-        self.pos = np.array([[(self.points_mat.item((0,0)) + self.points_mat.item((0,1)) + self.points_mat.item((0,2)) + self.points_mat.item((0,3))) / 4],
-                              [(self.points_mat.item((1,0)) + self.points_mat.item((1,1)) + self.points_mat.item((1,2)) + self.points_mat.item((1,3))) / 4]])
+        self.pos = np.average(self.points_mat, 1)
 
         #Recalculate wheel positions
         wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
@@ -321,8 +319,8 @@ class Car():
 
     def set_ang(self, ang):
         self.ang = ang
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                   [math.sin(self.ang), math.cos(self.ang)]])
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                   [np.sin(self.ang), np.cos(self.ang)]])
 
 
     def get_points_mat(self):

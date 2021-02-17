@@ -1,7 +1,5 @@
 import const
 import pygame
-import math
-import random
 import numpy as np
 from pygame.locals import *
 
