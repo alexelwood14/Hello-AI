@@ -11,31 +11,28 @@ class Wheel():
         self.window = window
         self.colour = colour
         self.size = size
-        
-        self.pos = np.array(pos)
-
+        self.pos = np.matrix([[pos[0]],
+                              [pos[1]]])
         self.ang = 0.0
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                [math.sin(self.ang), math.cos(self.ang)]])
+        self.mat = np.matrix([[math.cos(self.ang), -math.sin(self.ang)],
+                              [math.sin(self.ang),  math.cos(self.ang)]])
 
-        self.points_mat = np.array([[-self.size / 2, -self.size],
-                                    [self.size / 2, -self.size],
-                                    [self.size / 2, self.size],
-                                    [-self.size / 2, self.size]])
+        self.points_mat = np.matrix([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
+                                     [-self.size,     -self.size,     self.size,      self.size]])
 
     def render(self):
-        points = np.matmul(self.mat, np.transpose(self.points_mat))
-        points = np.transpose(points)
-        pygame.draw.polygon(self.window, self.colour, points + self.pos)
+        points = np.asarray(np.transpose(np.matmul(self.mat, self.points_mat) + self.pos))
+        pygame.draw.polygon(self.window, self.colour, points)
 
 
     def set_pos(self, pos):
-        self.pos = pos
+        self.pos = np.matrix([[pos[0]],
+                              [pos[1]]])
 
     def set_ang(self, ang):
         self.ang = ang
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                [math.sin(self.ang), math.cos(self.ang)]])
+        self.mat = np.matrix([[math.cos(self.ang), -math.sin(self.ang)],
+                              [math.sin(self.ang),  math.cos(self.ang)]])
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +49,7 @@ class Car():
         self.ai = ai.Neural_Network(window, 9, [10, 10], 4)
 
         #Setup dynamic attributes
-        self.pos = np.matrix([[pos[0]], [pos[1]]])
+        self.pos = pos
         self.speed = 0.0
         self.vel = np.array([0.0,0.0])
         self.acc = 0.0
@@ -91,10 +88,10 @@ class Car():
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] + self.size, self.pos[1] + self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos[0] - self.size, self.pos[1] + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) - self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) + self.size * 1.6], size / 3))
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -250,10 +247,10 @@ class Car():
         wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
         
         #Apply new wheel_positions
-        self.wheels[0].set_pos([wheel_pos.item((0,0)) + self.pos[0], wheel_pos.item((1,0)) + self.pos[1]])
-        self.wheels[1].set_pos([wheel_pos.item((0,1)) + self.pos[0], wheel_pos.item((1,1)) + self.pos[1]])
-        self.wheels[2].set_pos([wheel_pos.item((0,2)) + self.pos[0], wheel_pos.item((1,2)) + self.pos[1]])
-        self.wheels[3].set_pos([wheel_pos.item((0,3)) + self.pos[0], wheel_pos.item((1,3)) + self.pos[1]])
+        self.wheels[0].set_pos([wheel_pos.item((0,0)) + self.pos.item(0), wheel_pos.item((1,0)) + self.pos.item(1)])
+        self.wheels[1].set_pos([wheel_pos.item((0,1)) + self.pos.item(0), wheel_pos.item((1,1)) + self.pos.item(1)])
+        self.wheels[2].set_pos([wheel_pos.item((0,2)) + self.pos.item(0), wheel_pos.item((1,2)) + self.pos.item(1)])
+        self.wheels[3].set_pos([wheel_pos.item((0,3)) + self.pos.item(0), wheel_pos.item((1,3)) + self.pos.item(1)])
 
         #Apply new wheel rotations
         self.wheels[0].set_ang(self.ang)
@@ -266,15 +263,16 @@ class Car():
         for wheel in self.wheels:
             wheel.render()
 
-        pygame.draw.polygon(self.window, const.COL["red"], self.points_mat)
+        points = np.asarray(np.transpose(self.points_mat))
+        pygame.draw.polygon(self.window, const.COL["red"], points)
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
     def crash_check(self):
-        if (self.window.get_at([int(self.points_mat[0][0]), int(self.points_mat[0][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[1][0]), int(self.points_mat[1][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[2][0]), int(self.points_mat[2][1])])[0] == 0 or
-            self.window.get_at([int(self.points_mat[3][0]), int(self.points_mat[3][1])])[0] == 0):
+        if (self.window.get_at([int(self.points_mat.item((0,0))), int(self.points_mat.item((1,0)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,1))), int(self.points_mat.item((1,1)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,2))), int(self.points_mat.item((1,2)))])[0] == 0 or
+            self.window.get_at([int(self.points_mat.item((0,3))), int(self.points_mat.item((1,3)))])[0] == 0):
             self.crashed = True
         else:
             self.crashed = False
@@ -310,7 +308,6 @@ class Car():
 
         #Stopping condition is that the inctiment is less than 1 pixel
         if incriment_length > 1:
-            #print(vector)
             if start_pos[0] < self.window.get_size()[0] and start_pos[0] >= 0 and start_pos[1] < self.window.get_size()[1] and start_pos[1] >= 0: 
                 colour = self.window.get_at([int(start_pos[0]), int(start_pos[1])])[0]
             else:

@@ -59,11 +59,16 @@ def next_gen_cars(window, cars, track):
     return new_cars
 
 def get_track_points(file, asp_ratio):
-    track_points = []
     f = open("data\{}".format(file), "r")
-    for line in f:
-        point = line.split()
-        track_points.append(asp_ratio*np.array([int(point[0]), int(point[1])]))
+    line = f.readline()
+    point = line.split()
+    track_points = asp_ratio * np.matrix([[int(point[0])],
+                                          [int(point[1])]])
+    for l in f:
+        point = l.split()
+        point = asp_ratio * np.matrix([[int(point[0])],
+                                       [int(point[1])]])
+        track_points = np.concatenate((track_points, point), 1)
     return track_points
 
 def write_snapshot(cars):
@@ -90,7 +95,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 100
+    car_num = 20
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -98,12 +103,12 @@ def race(window, clock, action, mouse_used):
     
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track3", asp_ratio)
+    track_points = get_track_points("track1", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     start_ang = track.get_start_ang()
     for car in range(car_num):
-        cars.append(car_o.Car(window, track_points[0], 10, start_ang))
+        cars.append(car_o.Car(window, track_points[:,[0]], 10, start_ang))
     
     while action == const.MODE.RACE:
         window.fill(const.COL["black"])
@@ -158,7 +163,7 @@ def race(window, clock, action, mouse_used):
                         car.crash_check()
 
             for car in range(len(cars)):
-                if car % (car_num/25) == 0:
+                if car % (car_num/20) == 0:
                     cars[car].render()
 
             simulating = False

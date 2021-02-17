@@ -11,32 +11,37 @@ class Map():
         self.width = width
 
         self.points = points
-        self.lines = []
+        self.lines = self.points[:, [1]] - self.points[:, [0]]
 
         self.track_length = 0
-        for point in range(len(self.points)):
-            if point == len(self.points) - 1:
-                self.lines.append(self.points[0] - self.points[point])
+        for point in range(1, np.shape(self.points)[1]):
+            if point == np.shape(self.points)[1] - 1:
+                new_line = self.points[:, [0]] - self.points[:, [point]]
             else:
-                self.lines.append(self.points[point + 1] - self.points[point])
-            self.track_length += np.sqrt((self.lines[len(self.lines)-1]).dot(self.lines[len(self.lines)-1]))
+                new_line = self.points[:, [point + 1]] - self.points[:, [point]]
+            self.lines = np.concatenate((self.lines, new_line), 1)
+            self.track_length += np.sqrt(np.matmul(np.transpose(new_line), new_line))
 
-        vector = self.points[1] - self.points[0]
-        vector /= np.sqrt(vector.dot(vector))
-        if (vector[1] >= 0):
-            self.start_ang = np.arccos(vector.dot(np.array([1,0])))
+        print(self.points)
+        print(self.lines)
+
+        vector = self.lines[:, [0]]
+        vector /= np.sqrt(np.matmul(np.transpose(vector), vector))
+        if (vector.item(1) < 0):
+            self.start_ang = np.arccos(np.matmul(np.array([1,0]), vector).item())
         else:
-            self.start_ang = np.arccos(-vector.dot(np.array([1,0])))
+            self.start_ang = np.arccos(-np.matmul(np.array([1,0]), vector).item())
 
     def render(self):
-        for point in self.points:
-            pygame.draw.circle(self.window, self.colour, point, int(self.width/2))
-        for point in range(len(self.points)-1):
-            vector = self.points[point+1] - self.points[point]
-            vector /= np.sqrt(vector.dot(vector))
-            normal = np.array([-vector[1], vector[0]])
-            poly_points = [self.points[point] + normal*self.width/2, self.points[point] - normal*self.width/2,
-                           self.points[point+1] - normal*self.width/2, self.points[point+1] + normal*self.width/2]
+        for point in range(np.shape(self.points)[1]):
+            pygame.draw.circle(self.window, self.colour, self.points[:,[point]], int(self.width/2))
+        for point in range(np.shape(self.points)[1]-1):
+            vector = self.points[:, [point+1]] - self.points[:, [point]]
+            vector /= np.sqrt(np.matmul(np.transpose(vector), vector))
+            normal = np.matrix([[-vector.item(1)], 
+                                [ vector.item(0)]])
+            poly_points = [self.points[:, [point]] + normal*self.width/2, self.points[:, [point]] - normal*self.width/2,
+                           self.points[:, [point+1]] - normal*self.width/2, self.points[:, [point+1]] + normal*self.width/2]
             pygame.draw.polygon(self.window, self.colour, poly_points)
 
 
@@ -58,21 +63,21 @@ class Map():
     def progress(self, coord):
         progress = 0
         for point in range(len(self.points)):
-            line_v = self.lines[point]
-            line_s = self.points[point]
+            line_v = self.lines[:, [point]]
+            line_s = self.points[:, [point]]
             
-            mu = (line_v[0]*(coord[0] - line_s[0]) + line_v[1]*(coord[1] - line_s[1])) / (line_v[0]**2 + line_v[1]**2)
+            mu = (line_v.item(0)*(coord.item(0) - line_s.item(0)) + line_v.item(1)*(coord.item(1) - line_s.item(1))) / (line_v.item(0)**2 + line_v.item(0)**2)
 
-            fringe = self.width / 2 / np.sqrt((line_v).dot(line_v))
+            fringe = self.width / 2 / np.sqrt(np.matmul(np.transpose(line_v), line_v)).item()
 
             vector = coord - line_s - mu * line_v
-            distance = np.sqrt((vector).dot(vector))
+            distance = np.sqrt(np.matmul(np.transpose(vector), vector)).item()
             
             if mu <= -fringe or mu >= 1 + fringe or distance > self.width/2:
-                progress += np.sqrt((line_v).dot(line_v))
+                progress += np.sqrt(np.matmul(np.transpose(line_v), line_v)).item()
             else:
                 vector = mu * line_v
-                progress += np.sqrt((vector).dot(vector))
+                progress += np.sqrt(np.matmul(np.transpose(vector), vector)).item()
                 break
             
 
