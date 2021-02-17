@@ -51,7 +51,7 @@ class Car():
         #Setup dynamic attributes
         self.pos = pos
         self.speed = 0.0
-        self.vel = np.array([0.0,0.0])
+        self.vel = np.matrix([[0.0],[0.0]])
         self.acc = 0.0
         self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
@@ -191,15 +191,15 @@ class Car():
         wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
 
         #Find axel pivot points
-        self.front_axel = wheel_pos.item(4)
-        self.rear_axel = wheel_pos.item(5)
+        self.front_axel = wheel_pos[:, [4]]
+        self.rear_axel = wheel_pos[:, [5]]
 
         #Recalculate wheel matrix
         self.front_mat = np.array([[math.cos(self.wheel_ang + self.ang), -math.sin(self.wheel_ang + self.ang)],
                                 [math.sin(self.wheel_ang + self.ang), math.cos(self.wheel_ang + self.ang)]])
         
         #Calculate wheel normals and direction normal
-        self.front_norm = np.matmul(self.ang_mat, np.matrix([[1.0], [0.0]]))
+        self.front_norm = np.matmul(self.front_mat, np.matrix([[1.0], [0.0]]))
         self.rear_norm = np.matmul(self.ang_mat, np.matrix([[1.0], [0.0]]))
         self.anti_rear_norm = np.matmul(self.ang_mat, np.matrix([[-1.0], [0.0]]))
         self.direcion_norm = np.matmul(self.ang_mat, np.matrix([[0.0], [1.0]]))
@@ -207,9 +207,9 @@ class Car():
         self.nw_ray = np.matmul(self.ang_mat, np.matrix([[-1.0], [1.0]]))
 
         #Find turing point
-        if (self.rear_norm[0] * self.front_norm[1] - self.rear_norm[1] * self.front_norm[0]) != 0:
-            mu = ((self.rear_norm[0]*(self.rear_axel[1] - self.front_axel[1]) - self.rear_norm[1]*(self.rear_axel[0] - self.front_axel[0]))
-                  / (self.rear_norm[0] * self.front_norm[1] - self.rear_norm[1] * self.front_norm[0]))
+        if (self.rear_norm.item(0) * self.front_norm.item(1) - self.rear_norm.item(1) * self.front_norm.item(0)) != 0:
+            mu = ((self.rear_norm.item(0)*(self.rear_axel.item(1) - self.front_axel.item(1)) - self.rear_norm.item(1)*(self.rear_axel.item(0) - self.front_axel.item(0)))
+                  / (self.rear_norm.item(0) * self.front_norm.item(1) - self.rear_norm.item(1) * self.front_norm.item(0)))
             self.turning_point = self.front_axel + mu * self.front_norm + self.pos
         else:
             mu = 100000

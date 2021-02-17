@@ -22,9 +22,6 @@ class Map():
             self.lines = np.concatenate((self.lines, new_line), 1)
             self.track_length += np.sqrt(np.matmul(np.transpose(new_line), new_line))
 
-        print(self.points)
-        print(self.lines)
-
         vector = self.lines[:, [0]]
         vector /= np.sqrt(np.matmul(np.transpose(vector), vector))
         if (vector.item(1) < 0):
