@@ -35,7 +35,7 @@ class Map():
         for point in range(np.shape(self.points)[1]-1):
             vector = self.points[:, [point+1]] - self.points[:, [point]]
             vector /= np.sqrt(np.matmul(np.transpose(vector), vector))
-            normal = np.matrix([[-vector.item(1)], 
+            normal = np.array([[-vector.item(1)], 
                                 [ vector.item(0)]])
             poly_points = [self.points[:, [point]] + normal*self.width/2, self.points[:, [point]] - normal*self.width/2,
                            self.points[:, [point+1]] - normal*self.width/2, self.points[:, [point+1]] + normal*self.width/2]

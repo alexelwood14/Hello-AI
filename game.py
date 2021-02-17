@@ -42,7 +42,7 @@ def next_gen_cars(window, cars, track):
     start_ang = track.get_start_ang()
     new_cars = []
     for car in range(car_num):
-        new_cars.append(car_o.Car(window, track.get_points()[0], 10, start_ang))
+        new_cars.append(car_o.Car(window, track.get_points()[:, [0]], 10, start_ang))
 
     for car in range(car_num):
         new_cars[car].set_biases(cars[car].get_biases())
@@ -95,7 +95,7 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 20
+    car_num = 100
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
@@ -163,7 +163,7 @@ def race(window, clock, action, mouse_used):
                         car.crash_check()
 
             for car in range(len(cars)):
-                if car % (car_num/20) == 0:
+                if car % (car_num/25) == 0:
                     cars[car].render()
 
             simulating = False
