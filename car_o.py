@@ -37,18 +37,15 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, pos, size, ang):
+    def __init__(self, window, track, size):
         self.window = window
         self.size = size
         self.crashed = False
         self.progress = 0
         self.manual = False
 
-        #Setup AI
-        self.ai = ai.Neural_Network(window, 9, [10], 4)
-
         #Setup dynamic attributes
-        self.pos = pos
+        self.pos = track.get_start()
         self.speed = 0.0
         self.vel = np.array([[0.0],[0.0]])
         self.acc = 0.0
@@ -139,7 +136,7 @@ class Car():
             self.speed = -self.term_speed/3
 
 
-    def network_input(self, frame_time):
+    def network_inputs(self, frame_time):
         #Calculate network speed inputs
         if self.speed >= 0:
             speed_forwards = self.speed / self.term_speed
@@ -156,9 +153,13 @@ class Car():
             wheel_right = 0.0
             wheel_left = self.wheel_ang / self.max_wheel_ang
             
-        inputs = self.ai.process([speed_forwards, speed_backwards, wheel_right, wheel_left,
-                                  self.distances[0], self.distances[1], self.distances[2], self.distances[3], self.distances[4]])
+        inputs = [speed_forwards, speed_backwards, wheel_right, wheel_left,
+                  self.distances[0], self.distances[1], self.distances[2], self.distances[3], self.distances[4]]
 
+        return inputs
+
+
+    def network_outputs(self, inputs, frame_time):
         self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
 

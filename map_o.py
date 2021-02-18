@@ -86,6 +86,9 @@ class Map():
 
     def get_points(self):
         return self.points
+
+    def get_start(self):
+        return self.points[:,[0]]
                 
 
         

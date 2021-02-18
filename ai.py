@@ -1,189 +1,109 @@
 import const
-import pygame
+import neural_network
+import car_o
 import numpy as np
-from pygame.locals import *
 
 class AI():
-    def __init__(self, window):
+    def __init__(self, window, track, agents_num):
         self.window = window
         self.agents = []
-        self.agents_count = 100
-        for i in range(self.agents_count):
-            self.agents.append(Agent(self.window))
+        self.agents_num = agents_num
+        self.shape = [9, [10], 4]
+        self.track = track
+        for i in range(self.agents_num):
+            self.agents.append(Agent(self.window, self.track, self.shape))
+
+    
+    def sort_cars(self, cars):
+        temp_cars = cars[:]
+        sorted_cars = []
+        for i in range(len(cars)):
+            highest, index = self.find_top_car(temp_cars)
+            sorted_cars.append(highest)
+            temp_cars.pop(index)
+        sorted_cars.reverse()
+
+        return sorted_cars
+
+    
+    def find_top_car(self, cars):
+        highest = cars[0]
+        index = 0
+        for car in range(len(cars)):
+            if cars[car].get_progress() > highest.get_progress():
+                highest = cars[car]
+                index = car
+
+        return highest, index
+
+
+    def next_gen_cars(self, window, cars, track):
+        car_num = len(cars)
+        
+        #Create an array of parents
+        parents = []
+        for i in range(int(car_num/10)):
+            parents.append(cars[int(9*car_num/10) + i])
+
+        #Copy cars to a new array
+        start_ang = track.get_start_ang()
+        new_cars = []
+        for car in range(car_num):
+            new_cars.append(car_o.Car(window, track.get_points()[:, [0]], 10, start_ang))
+
+        for car in range(car_num):
+            new_cars[car].set_biases(cars[car].get_biases())
+            new_cars[car].set_weights(cars[car].get_weights())        
+
+        #Replace least performing cars with children of parents and mutate
+        for i in range(3):
+            for car in range(len(parents)):
+                new_cars[car + (i*10)].set_biases(parents[car].get_biases())
+                new_cars[car + (i*10)].set_weights(parents[car].get_weights())        
+                new_cars[car + (i*10)].mutate_biases()
+                new_cars[car + (i*10)].mutate_weights()
+                
+        return new_cars
+
+    
+    def write_snapshot(self, cars):
+        f = open("data\snapshot", "w")
+        f.close()
+        f = open("data\snapshot", "a")
+
+        for car in range(int(len(cars) - len(cars)/10), len(cars)):
+            f.write("NETWORK_{}\n".format(car))
+            weights = cars[car].get_weights()
+            biases = cars[car].get_biases()
+            f.write(str(weights))
+            f.write("\n")
+            f.write(str(biases))
+            f.write("\n")
+        
+        f.close()
+
+    def run(self, frame_time):
+        for agent in self.agents:
+            agent.run(frame_time)
+
 
 class Agent():
-    def __init__(self, window):
+    def __init__(self, window, track, shape):
         self.window = window
-        self.car = 0
-        self.neural_net = 0
+        self.track = track
+        self.shape = shape
+        self.car = car_o.Car(self.window, self.track, 10)
+        self.neural_net = neural_network.Neural_Network(self.window, self.shape)
 
-#----------------------------------------------------------------------------------------------------------------------------------
-class Neural_Network():
-    def __init__(self, window, inputs, hidden, outputs):
-        self.window = window
-        self.weights = []
-        self.biases = []
-        mean = 0
-        std_dev = 0.1
-        self.layers = len(hidden) + 1
-        
-        #---INITIATE HIDDEN LAYER BIASES AND NODES---
-        
-        #Initiate weights leading to hidden layers
-        for layer in range(len(hidden)):
-            #Setup biases matrix using first element
-            bias = np.random.normal(mean, std_dev)
-            temp_3 = np.array([bias])
-
-            #Append all other biases to the matrix
-            for i in range(1, hidden[layer]):
-                bias = np.random.normal(mean, std_dev)
-                temp_3 = np.append(temp_3, bias)
-
-            self.biases.append(temp_3)
-
-            #---INITATE HIDDEN LAYER WEIGHTS AND AXONS
-
-            #Setup weights matrix using first weights of array
-            temp_2 = []
-            if layer == 0:
-                for j in range(inputs):
-                    weight = np.random.normal(mean, std_dev)
-                    temp_2.append(weight)
-            else:
-                for j in range(hidden[layer-1]):
-                    weight = np.random.normal(mean, std_dev)
-                    temp_2.append(weight)
-            temp_1 = np.array([temp_2])
-
-            #Append all other weights to the martix
-            for i in range(1, hidden[layer]):
-                temp_2 = []
-
-                if layer == 0:
-                    for j in range(inputs):
-                        weight = np.random.normal(mean, std_dev)
-                        temp_2.append(weight)
-                else:
-                    for j in range(hidden[layer-1]):
-                        weight = np.random.normal(mean, std_dev)
-                        temp_2.append(weight)
-
-                temp_1 = np.append(temp_1, [temp_2], axis=0)
-                    
-
-            self.weights.append(temp_1)
-
-
-
-        #---INITIATE OUTPUT BIASES AND NODES---
-
-        #Setup biases matrix using first element
-        bias = np.random.normal(mean, std_dev)
-        temp_3 = np.array([bias])
-
-        #Append all other biases to the matrix
-        for i in range(1, outputs):
-            bias = np.random.normal(mean, std_dev)
-            temp_3 = np.append(temp_3, bias)
-        self.biases.append(temp_3)
-
-
-        #---INITIATE OUTPUT WEIGHTS AND AXONS---
-
-        #Setup weights matrix using first weights of array
-        temp_2 = []
-        for j in range(hidden[len(hidden)-1]):
-            weight = np.random.normal(mean, std_dev)
-            temp_2.append(np.random.normal(mean, std_dev))
-        temp_1 = np.array([temp_2])
-
-        #Append all other weights to the matrix
-        for i in range(1, outputs):
-            temp_2 = []
-            for j in range(hidden[len(hidden)-1]):
-                weight = np.random.normal(mean, std_dev)
-                temp_2.append(np.random.normal(mean, std_dev))
-            temp_1 = np.append(temp_1, [temp_2], axis=0)
-
-        self.weights.append(temp_1)
-
-
-    def process(self, layer_data, set_activations=False):
-        layer_data = np.array(layer_data)
-        activations = [layer_data]
-                
-        for layer in range(self.layers):
-            
-            layer_data = 1/(1+np.exp(-(np.matmul(self.weights[layer], layer_data) + self.biases[layer])))
-            activations.append(layer_data)
-
-        if set_activations:
-            self.set_activations(activations)
-            
-        return layer_data
-
-
-    def set_weights(self, weights):
-        for layer in range(len(weights)):
-            for node in range(len(self.weights[layer])):
-                self.weights[layer][node] = weights[layer][node][:]
-
-
-    def set_biases(self, biases):
-        for layer in range(len(biases)):
-            for b in range(len(biases[layer])):
-                self.biases[layer][b] = biases[layer][b]
-
-    def crossover(self, parent1, parent2):
-        biases1 = parent1.get_biases()
-        biases2 = parent2.get_biases()
-        for layer in range(len(self.biases)):
-            for bias in range(len(self.biases[layer])):
-                if layer*bias % 2 == 0:
-                    self.biases[layer][bias] = biases1[layer][bias]
-                else:
-                    self.biases[layer][bias] = biases2[layer][bias]
-
-        weights1 = parent1.get_weights()
-        weights2 = parent2.get_weights()
-        for layer in range(len(self.weights)):
-            for node in range(len(self.weights[layer])):
-                for w in range(len(self.weights[layer][node])):
-                    if layer*node % 2 == 0:
-                        self.weights[layer][node][w] = weights1[layer][node][w]
-                    else:
-                        self.weights[layer][node][w] = weights2[layer][node][w]
-
-
-    def mutate_biases(self):
-        var = 1
-        std_dev = var**2 
-        for layer in range(len(self.biases)):
-            for bias in range(len(self.biases[layer])):
-                mutation = np.random.normal(0, std_dev)
-                if abs(mutation) > 2 * np.sqrt(std_dev): 
-                    self.biases[layer][bias] += mutation
-
-
-    def mutate_weights(self):
-        var = 1
-        std_dev = var**2 
-        for layer in range(len(self.weights)):
-            for node in range(len(self.weights[layer])):
-                for w in range(len(self.weights[layer][node])):
-                    mutation = np.random.normal(0, std_dev)
-                    if abs(mutation) > 2 * np.sqrt(std_dev):
-                        self.weights[layer][node][w] += mutation
-
-        
-    def get_weights(self):
-        return self.weights
-    
-
-    def get_biases(self):
-        return self.biases        
-        
+    def run(self, frame_time):
+        if not self.car.get_crashed():
+            self.car.find_distances()
+            inputs = self.car.network_inputs(frame_time)
+            outputs = self.neural_net.process(inputs)
+            self.car.network_outputs(outputs, frame_time)
+            self.car.dynamics(frame_time)
+            self.car.find_progress(self.track)
+            self.car.crash_check()
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():

@@ -2,60 +2,11 @@ import const
 import time
 import pygame
 import numpy as np
-import car_o
+import ai
 import map_o
 import pygame_ui
 from pygame.locals import *
 
-def sort_cars(cars):
-    temp_cars = cars[:]
-    sorted_cars = []
-    for i in range(len(cars)):
-        highest, index = find_top_car(temp_cars)
-        sorted_cars.append(highest)
-        temp_cars.pop(index)
-    sorted_cars.reverse()
-
-    return sorted_cars
-
-
-def find_top_car(cars):
-    highest = cars[0]
-    index = 0
-    for car in range(len(cars)):
-        if cars[car].get_progress() > highest.get_progress():
-            highest = cars[car]
-            index = car
-
-    return highest, index
-
-def next_gen_cars(window, cars, track):
-    car_num = len(cars)
-    
-    #Create an array of parents
-    parents = []
-    for i in range(int(car_num/10)):
-        parents.append(cars[int(9*car_num/10) + i])
-
-    #Copy cars to a new array
-    start_ang = track.get_start_ang()
-    new_cars = []
-    for car in range(car_num):
-        new_cars.append(car_o.Car(window, track.get_points()[:, [0]], 10, start_ang))
-
-    for car in range(car_num):
-        new_cars[car].set_biases(cars[car].get_biases())
-        new_cars[car].set_weights(cars[car].get_weights())        
-
-    #Replace least performing cars with children of parents and mutate
-    for i in range(3):
-        for car in range(len(parents)):
-            new_cars[car + (i*10)].set_biases(parents[car].get_biases())
-            new_cars[car + (i*10)].set_weights(parents[car].get_weights())        
-            new_cars[car + (i*10)].mutate_biases()
-            new_cars[car + (i*10)].mutate_weights()
-            
-    return new_cars
 
 def get_track_points(file, asp_ratio):
     f = open("data\{}".format(file), "r")
@@ -70,22 +21,6 @@ def get_track_points(file, asp_ratio):
         track_points = np.concatenate((track_points, point), 1)
     return track_points
 
-def write_snapshot(cars):
-    f = open("data\snapshot", "w")
-    f.close()
-    f = open("data\snapshot", "a")
-
-    for car in range(int(len(cars) - len(cars)/10), len(cars)):
-        f.write("NETWORK_{}\n".format(car))
-        weights = cars[car].get_weights()
-        biases = cars[car].get_biases()
-        f.write(str(weights))
-        f.write("\n")
-        f.write(str(biases))
-        f.write("\n")
-    
-    f.close()
-
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
@@ -94,20 +29,17 @@ def race(window, clock, action, mouse_used):
     simulating = True
     gen_time = 0
     gen = 0
-    car_num = 100
+    agents_num = 100
     cars = [] 
     f = open("data/average_progress", "w")
     f.write("AVG_PROGRESS")
     f.close()
-    
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
     track_points = get_track_points("track1", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
-    start_ang = track.get_start_ang()
-    for car in range(car_num):
-        cars.append(car_o.Car(window, track_points[:,[0]], 10, start_ang))
+    race_ai = ai.AI(window, track, agents_num) 
     
     while action == const.MODE.RACE:
         window.fill(const.COL["black"])
@@ -153,13 +85,7 @@ def race(window, clock, action, mouse_used):
         #Car Processing
         if simulating:
             if not paused:
-                for car in cars:
-                    if not car.get_crashed():
-                        car.find_distances()
-                        car.inputs(frame_time)
-                        car.dynamics(frame_time)
-                        car.find_progress(track)
-                        car.crash_check()
+                race_ai.run(frame_time)
 
             for car in range(len(cars)):
                 if car % (car_num/25) == 0:
@@ -186,7 +112,7 @@ def race(window, clock, action, mouse_used):
             f.close()
             
             cars = sort_cars(cars)
-            write_snapshot(cars)
+            race_ai.write_snapshot(cars)
             cars = next_gen_cars(window, cars, track)
 
             gen += 1

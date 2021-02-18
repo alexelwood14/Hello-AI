@@ -3,7 +3,6 @@ import pygame
 import numpy as np
 import pygame_ui
 import game
-import network
 import enum
 from pygame.locals import *
 
