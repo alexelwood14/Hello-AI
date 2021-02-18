@@ -30,10 +30,6 @@ def race(window, clock, action, mouse_used):
     gen_time = 0
     gen = 0
     agents_num = 100
-    cars = [] 
-    f = open("data/average_progress", "w")
-    f.write("AVG_PROGRESS")
-    f.close()
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
     track_points = get_track_points("track1", asp_ratio)
@@ -86,34 +82,16 @@ def race(window, clock, action, mouse_used):
         if simulating:
             if not paused:
                 race_ai.run(frame_time)
-
-            for car in range(len(cars)):
-                if car % (car_num/25) == 0:
-                    cars[car].render()
+            race_ai.render()
 
             simulating = False
-            for car in cars:
-                if not car.get_crashed():
-                    simulating = True
+            if not race_ai.gen_over():
+                simulating = True
             
         else:
-            average_progress = 0
-            for car in cars:
-                if car.get_progress() < 0:
-                    print("error")
-                    print(car.get_progress())
-
-                average_progress += car.get_progress()
-            average_progress /= len(cars)
-
-            f = open("data/average_progress", "a")
-            f.write("\n")
-            f.write(str(average_progress))
-            f.close()
-            
-            cars = sort_cars(cars)
-            race_ai.write_snapshot(cars)
-            cars = next_gen_cars(window, cars, track)
+            race_ai.write_progress()
+            race_ai.write_snapshot()
+            race_ai.next_gen()
 
             gen += 1
             simulating = True

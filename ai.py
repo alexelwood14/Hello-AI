@@ -10,11 +10,28 @@ class AI():
         self.agents_num = agents_num
         self.shape = [9, [10], 4]
         self.track = track
-        for i in range(self.agents_num):
-            self.agents.append(Agent(self.window, self.track, self.shape))
+        for num in range(self.agents_num):
+            if num % 4 == 0:
+                self.agents.append(Agent(self.window, self.track, self.shape, True))
+            else:
+                self.agents.append(Agent(self.window, self.track, self.shape))
+
+        f = open("data/average_progress", "w")
+        f.write("AVG_PROGRESS")
+        f.close()
 
     
-    def sort_cars(self, cars):
+    def run(self, frame_time):
+        for agent in self.agents:
+            agent.run(frame_time)
+
+
+    def render(self):
+        for agent in self.agents:
+            agent.render()
+
+    
+    def sort_agents(self, cars):
         temp_cars = cars[:]
         sorted_cars = []
         for i in range(len(cars)):
@@ -23,10 +40,8 @@ class AI():
             temp_cars.pop(index)
         sorted_cars.reverse()
 
-        return sorted_cars
-
     
-    def find_top_car(self, cars):
+    def find_top_car(self):
         highest = cars[0]
         index = 0
         for car in range(len(cars)):
@@ -37,8 +52,8 @@ class AI():
         return highest, index
 
 
-    def next_gen_cars(self, window, cars, track):
-        car_num = len(cars)
+    def next_gen(self):
+        self.sort_agents()
         
         #Create an array of parents
         parents = []
@@ -65,7 +80,22 @@ class AI():
                 
         return new_cars
 
-    
+
+    def gen_over(self):
+        pass
+
+
+    def write_progress(self):
+        average_progress = 0
+        for agent in self.agents:
+            average_progress += agent.get_progress()
+        average_progress /= self.agents_num
+        f = open("data/average_progress", "a")
+        f.write("\n")
+        f.write(str(average_progress))
+        f.close()
+
+
     def write_snapshot(self, cars):
         f = open("data\snapshot", "w")
         f.close()
@@ -82,16 +112,13 @@ class AI():
         
         f.close()
 
-    def run(self, frame_time):
-        for agent in self.agents:
-            agent.run(frame_time)
-
 
 class Agent():
-    def __init__(self, window, track, shape):
+    def __init__(self, window, track, shape, renderable=False):
         self.window = window
         self.track = track
         self.shape = shape
+        self.renderable = renderable
         self.car = car_o.Car(self.window, self.track, 10)
         self.neural_net = neural_network.Neural_Network(self.window, self.shape)
 
@@ -104,6 +131,10 @@ class Agent():
             self.car.dynamics(frame_time)
             self.car.find_progress(self.track)
             self.car.crash_check()
+
+    def render(self):
+        if self.renderable:
+            self.car.render()
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
