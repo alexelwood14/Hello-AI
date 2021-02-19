@@ -1,7 +1,6 @@
 import const
 import pygame
 import map_o
-import ai
 import numpy as np
 from pygame.locals import *
 
@@ -43,6 +42,7 @@ class Car():
         self.crashed = False
         self.progress = 0
         self.manual = False
+        self.track = track
 
         #Setup dynamic attributes
         self.pos = track.get_start()
@@ -310,8 +310,8 @@ class Car():
         pygame.draw.circle(self.window, const.COL["blue"], [int(self.turning_point[0]), int(self.turning_point[1])], 3)
         
 
-    def find_progress(self, track):
-        self.progress = track.progress(self.pos)
+    def find_progress(self):
+        self.progress = self.track.progress(self.pos)
         
 
     def get_crashed(self):
@@ -337,32 +337,9 @@ class Car():
 
 
     def get_progress(self):
+        self.find_progress()
         return self.progress
-    
 
-    def set_biases(self, biases):
-        self.ai.set_biases(biases)
-        
-
-    def set_weights(self, weights):
-        self.ai.set_weights(weights)
-        
-
-    def get_biases(self):
-        return self.ai.get_biases()
-    
-
-    def get_weights(self):
-        return self.ai.get_weights()
-
-    def mutate_biases(self):
-        self.ai.mutate_biases()
-
-    def mutate_weights(self):
-        self.ai.mutate_weights()
-
-    def crossover(self, parent1, parent2):
-        self.ai.crossover(parent1, parent2)
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():

@@ -76,10 +76,8 @@ class Map():
                 progress += np.sqrt(np.matmul(np.transpose(vector), vector)).item()
                 break
             
-
         progress /= self.track_length
-
-        return progress
+        return progress.item()
 
     def get_start_ang(self):
         return self.start_ang
