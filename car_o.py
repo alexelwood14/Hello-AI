@@ -1,8 +1,6 @@
 import const
 import pygame
-import math
 import map_o
-import ai
 import numpy as np
 from pygame.locals import *
 
@@ -14,8 +12,8 @@ class Wheel():
         self.pos = np.array([[pos[0]],
                               [pos[1]]])
         self.ang = 0.0
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                              [math.sin(self.ang),  math.cos(self.ang)]])
+        self.mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                              [np.sin(self.ang),  np.cos(self.ang)]])
 
         self.points_mat = np.array([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
                                      [-self.size,     -self.size,     self.size,      self.size]])
@@ -31,37 +29,35 @@ class Wheel():
 
     def set_ang(self, ang):
         self.ang = ang
-        self.mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                              [math.sin(self.ang),  math.cos(self.ang)]])
+        self.mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                              [np.sin(self.ang),  np.cos(self.ang)]])
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, pos, size, ang):
+    def __init__(self, window, track, size):
         self.window = window
         self.size = size
         self.crashed = False
         self.progress = 0
         self.manual = False
-
-        #Setup AI
-        self.ai = ai.Neural_Network(window, 9, [10], 4)
+        self.track = track
 
         #Setup dynamic attributes
-        self.pos = pos
+        self.pos = track.get_start()
         self.speed = 0.0
         self.vel = np.array([[0.0],[0.0]])
         self.acc = 0.0
         self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
-        self.ang = math.pi * 3 / 2
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                 [math.sin(self.ang),  math.cos(self.ang)]])
+        self.ang = np.pi * 3 / 2
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                 [np.sin(self.ang),  np.cos(self.ang)]])
 
         self.wheel_vel = 0.0
         self.wheel_ang = 0.00001
-        self.max_wheel_ang = math.pi/4
+        self.max_wheel_ang = np.pi/4
 
         #Setup geometry matrix
         self.points_mat = np.array([[-self.size,      self.size,     self.size,    -self.size],
@@ -140,7 +136,7 @@ class Car():
             self.speed = -self.term_speed/3
 
 
-    def network_input(self, frame_time):
+    def network_inputs(self, frame_time):
         #Calculate network speed inputs
         if self.speed >= 0:
             speed_forwards = self.speed / self.term_speed
@@ -157,9 +153,13 @@ class Car():
             wheel_right = 0.0
             wheel_left = self.wheel_ang / self.max_wheel_ang
             
-        inputs = self.ai.process([speed_forwards, speed_backwards, wheel_right, wheel_left,
-                                  self.distances[0], self.distances[1], self.distances[2], self.distances[3], self.distances[4]])
+        inputs = [speed_forwards, speed_backwards, wheel_right, wheel_left,
+                  self.distances[0], self.distances[1], self.distances[2], self.distances[3], self.distances[4]]
 
+        return inputs
+
+
+    def network_outputs(self, inputs, frame_time):
         self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
 
@@ -193,8 +193,8 @@ class Car():
         self.rear_axel = wheel_pos[:, [5]]
 
         #Recalculate wheel matrix
-        self.front_mat = np.array([[math.cos(self.wheel_ang + self.ang), -math.sin(self.wheel_ang + self.ang)],
-                                [math.sin(self.wheel_ang + self.ang), math.cos(self.wheel_ang + self.ang)]])
+        self.front_mat = np.array([[np.cos(self.wheel_ang + self.ang), -np.sin(self.wheel_ang + self.ang)],
+                                [np.sin(self.wheel_ang + self.ang), np.cos(self.wheel_ang + self.ang)]])
         
         #Calculate wheel normals and direction normal
         self.front_norm = np.matmul(self.front_mat, np.array([[1.0], [0.0]]))
@@ -224,10 +224,10 @@ class Car():
         if self.wheel_ang < 0:
             angle *= -1
         self.ang += angle
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                 [math.sin(self.ang), math.cos(self.ang)]])
-        translation_mat = np.array([[math.cos(angle), -math.sin(angle)],
-                                    [math.sin(angle), math.cos(angle)]])
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                 [np.sin(self.ang), np.cos(self.ang)]])
+        translation_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                                    [np.sin(angle), np.cos(angle)]])
 
         #Apply translation matrix
         self.points_mat = np.matmul(translation_mat, self.points_mat)
@@ -236,8 +236,7 @@ class Car():
         self.points_mat = self.points_mat + self.turning_point
 
         #Update position based on average points
-        self.pos = np.array([[(self.points_mat.item((0,0)) + self.points_mat.item((0,1)) + self.points_mat.item((0,2)) + self.points_mat.item((0,3))) / 4],
-                              [(self.points_mat.item((1,0)) + self.points_mat.item((1,1)) + self.points_mat.item((1,2)) + self.points_mat.item((1,3))) / 4]])
+        self.pos = np.average(self.points_mat, 1)
 
         #Recalculate wheel positions
         wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
@@ -311,8 +310,8 @@ class Car():
         pygame.draw.circle(self.window, const.COL["blue"], [int(self.turning_point[0]), int(self.turning_point[1])], 3)
         
 
-    def find_progress(self, track):
-        self.progress = track.progress(self.pos)
+    def find_progress(self):
+        self.progress = self.track.progress(self.pos)
         
 
     def get_crashed(self):
@@ -321,8 +320,8 @@ class Car():
 
     def set_ang(self, ang):
         self.ang = ang
-        self.ang_mat = np.array([[math.cos(self.ang), -math.sin(self.ang)],
-                                   [math.sin(self.ang), math.cos(self.ang)]])
+        self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
+                                   [np.sin(self.ang), np.cos(self.ang)]])
 
 
     def get_points_mat(self):
@@ -338,32 +337,9 @@ class Car():
 
 
     def get_progress(self):
+        self.find_progress()
         return self.progress
-    
 
-    def set_biases(self, biases):
-        self.ai.set_biases(biases)
-        
-
-    def set_weights(self, weights):
-        self.ai.set_weights(weights)
-        
-
-    def get_biases(self):
-        return self.ai.get_biases()
-    
-
-    def get_weights(self):
-        return self.ai.get_weights()
-
-    def mutate_biases(self):
-        self.ai.mutate_biases()
-
-    def mutate_weights(self):
-        self.ai.mutate_weights()
-
-    def crossover(self, parent1, parent2):
-        self.ai.crossover(parent1, parent2)
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():

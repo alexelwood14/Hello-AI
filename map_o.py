@@ -1,5 +1,4 @@
 import pygame
-import math
 import numpy as np
 from pygame.locals import *
         
@@ -77,16 +76,17 @@ class Map():
                 progress += np.sqrt(np.matmul(np.transpose(vector), vector)).item()
                 break
             
-
         progress /= self.track_length
-
-        return progress
+        return progress.item()
 
     def get_start_ang(self):
         return self.start_ang
 
     def get_points(self):
         return self.points
+
+    def get_start(self):
+        return self.points[:,[0]]
                 
 
         
