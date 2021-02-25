@@ -14,7 +14,7 @@ class AI():
             if num % 4 == 0:
                 self.agents.append(Agent(self.window, self.track, self.shape, True))
             else:
-                self.agents.append(Agent(self.window, self.track, self.shape))
+                self.agents.append(Agent(self.window, self.track, self.shape, True))
 
         with open("logs/average_progress", "w") as f:
             f.write("AVG_PROGRESS")
@@ -47,6 +47,7 @@ class AI():
 
         return out
 
+
     def merge_sort(self, array):
         if len(array) <= 1:
             return array
@@ -59,16 +60,19 @@ class AI():
 
     def next_gen(self):
         self.agents = self.merge_sort(self.agents)
+        for agent in range(len(self.agents)):
+            self.agents[agent].reset()   
+
+        for i in range(self.agents_num):
+            self.agents[i].set_colour(const.COL["blue"])
 
         #Create an array of parents
         parents = []
         for i in range(int(self.agents_num/10)):
             parents.append(self.agents[int(9*self.agents_num/10) + i])
+            self.agents[int(9*self.agents_num/10) + i].set_colour(const.COL["green"])
 
-        #Copy cars to a new array
         start_ang = self.track.get_start_ang()
-        for agent in range(len(self.agents)):
-            self.agents[agent].reset()   
 
         #Replace least performing cars with children of parents and mutate
         for i in range(3):
@@ -77,6 +81,7 @@ class AI():
                 self.agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
                 self.agents[agent + (i*10)].mutate_biases()
                 self.agents[agent + (i*10)].mutate_weights()
+                self.agents[agent + (i*10)].set_colour(const.COL["red"])
 
 
     def gen_over(self):
@@ -175,10 +180,6 @@ class Agent():
 
     def get_crashed(self):
         return self.car.get_crashed()
-        
-#----------------------------------------------------------------------------------------------------------------------------------
-def main():
-    pass
 
-if __name__ == "__main__":
-    main()
+    def set_colour(self, colour):
+        self.car.set_colour(colour)

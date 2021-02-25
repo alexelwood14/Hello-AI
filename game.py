@@ -106,13 +106,5 @@ def race(window, clock, action, mouse_used):
                       [window.get_size()[0]/32, window.get_size()[1]/10], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
 
         pygame.display.update()
-        
     
     return action, mouse_used
-
-#----------------------------------------------------------------------------------------------------------------------------------
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()

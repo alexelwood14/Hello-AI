@@ -18,6 +18,7 @@ class Wheel():
         self.points_mat = np.array([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
                                      [-self.size,     -self.size,     self.size,      self.size]])
 
+
     def render(self):
         points = np.asarray(np.transpose(np.matmul(self.mat, self.points_mat) + self.pos))
         pygame.draw.polygon(self.window, self.colour, points)
@@ -43,6 +44,7 @@ class Car():
         self.progress = 0
         self.manual = False
         self.track = track
+        self.colour = const.COL["red"]
 
         #Setup dynamic attributes
         self.pos = track.get_start()
@@ -77,8 +79,8 @@ class Car():
         #Setup normals
         self.front_norm = np.matmul(self.ang_mat, np.array([[1.0], [0.0]]))
         #[direction norm, rear norm, anti rear norm, ne_ray, nw_ray]
-        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0, -1.0], 
-                                                          [1.0, 0.0,  0.0, -1.0,  1.0]]))
+        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0/np.sqrt(2), -1.0/np.sqrt(2)], 
+                                                         [1.0, 0.0,  0.0, -1.0/np.sqrt(2),  1.0/np.sqrt(2)]]))
 
         #Set location of wheels
         self.wheels = []
@@ -145,8 +147,8 @@ class Car():
         #Calculate wheel normals and direction normal
         self.front_norm = np.matmul(self.front_mat, np.array([[1.0], [0.0]]))
         #[direction norm, rear norm, anti rear norm, ne_ray, nw_ray]
-        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0, -1.0], 
-                                                          [1.0, 0.0,  0.0, -1.0,  1.0]]))
+        self.normals = np.matmul(self.ang_mat, np.array([[0.0, 1.0, -1.0,  1.0/np.sqrt(2), -1.0/np.sqrt(2)], 
+                                                         [1.0, 0.0,  0.0, -1.0/np.sqrt(2),  1.0/np.sqrt(2)]]))
 
         #Find turing point
         if (self.normals.item((0, 1)) * self.front_norm.item(1) - self.normals.item((1, 1)) * self.front_norm.item(0)) != 0:
@@ -162,8 +164,7 @@ class Car():
 
         
         #Calculate rotation angle
-        vector = self.pos - self.turning_point
-        radius = (np.sqrt(np.matmul(np.transpose(vector), vector))).item()
+        radius = np.linalg.norm(self.pos - self.turning_point)
         self.speed += self.acc * frame_time
         displacement = self.speed * frame_time
         angle = displacement / radius
@@ -199,13 +200,12 @@ class Car():
         self.wheels[2].set_ang(self.wheel_ang + self.ang)
         self.wheels[3].set_ang(self.wheel_ang + self.ang)
 
-
     def render(self):
         for wheel in self.wheels:
             wheel.render()
 
         points = np.asarray(np.transpose(self.points_mat))
-        pygame.draw.polygon(self.window, const.COL["red"], points)
+        pygame.draw.polygon(self.window, self.colour, points)
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -221,10 +221,9 @@ class Car():
 
     def find_distances(self):
         self.distances = []
-        for i in range(np.shape(self.normals)[1]):
-            pos = self.iterate_distance(self.normals[:, [i]], self.pos, const.COL["light_grey"][0], 20, 1)
-            vector = self.pos - pos
-            self.distances.append((np.sqrt(np.matmul(np.transpose(vector), vector)) / const.BASE_RES).item())
+        for ray in range(np.shape(self.normals)[1]):
+            pos = self.iterate_distance(self.normals[:, [ray]], self.pos, const.COL["light_grey"][0], 20, 1)
+            self.distances.append(np.linalg.norm(self.pos - pos) / const.BASE_RES)
 
     #Recursive method for finding the distance from the car to a wall
     def iterate_distance(self, vector, start_pos, start_colour, incriment_length, direction):
@@ -286,10 +285,5 @@ class Car():
         self.find_progress()
         return self.progress
 
-        
-#----------------------------------------------------------------------------------------------------------------------------------
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()
+    def set_colour(self, colour):
+        self.colour = colour
