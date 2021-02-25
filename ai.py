@@ -78,6 +78,14 @@ class AI():
                 self.agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
                 self.agents[agent + (i*10)].mutate_biases()
                 self.agents[agent + (i*10)].mutate_weights()
+
+
+    def gen_over(self):
+        over = True
+        for agent in self.agents:
+            if not agent.get_crashed():
+                over = False
+        return over
         
 
     def write_progress(self):
@@ -168,6 +176,10 @@ class Agent():
 
     def get_biases(self):
         return self.neural_net.get_biases()
+
+
+    def get_crashed(self):
+        return self.car.get_crashed()
         
 #----------------------------------------------------------------------------------------------------------------------------------
 def main():
