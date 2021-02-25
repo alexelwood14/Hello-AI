@@ -24,9 +24,10 @@ def get_track_points(file, asp_ratio):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, mouse_used):
-    paused = False
+    paused = True
     display_debug = True
     simulating = True
+    wait_time = 0
     gen_time = 0
     gen = 0
     agents_num = 100
@@ -40,6 +41,10 @@ def race(window, clock, action, mouse_used):
     while action == const.MODE.RACE:
         window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
+        if wait_time > 0.5:
+            paused = False 
+        else:
+            wait_time += frame_time
         if not paused:
             gen_time += frame_time
         if gen_time >= 30:
@@ -96,6 +101,8 @@ def race(window, clock, action, mouse_used):
             gen += 1
             simulating = True
             gen_time = 0
+            wait_time = 0
+            paused = True
 
 
         #Display debug info
