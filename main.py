@@ -31,8 +31,6 @@ class Hello_AI():
                 self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
             elif self.mode == const.MODE.RACE:
                 self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.mouse_used)
-            elif self.mode == const.MODE.NETWORK:
-                self.mode, mouse_used = network.network(self.window, self.clock, self.mode, self.mouse_used)
             elif self.mode == const.MODE.QUIT:
                 pygame.quit()
                 quit()

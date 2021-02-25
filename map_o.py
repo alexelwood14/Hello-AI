@@ -28,17 +28,25 @@ class Map():
         else:
             self.start_ang = np.arccos(-np.matmul(np.array([1,0]), vector).item())
 
-    def render(self):
-        for point in range(np.shape(self.points)[1]):
-            pygame.draw.circle(self.window, self.colour, self.points[:,[point]], int(self.width/2))
+        self.poly_points = []
         for point in range(np.shape(self.points)[1]-1):
             vector = self.points[:, [point+1]] - self.points[:, [point]]
             vector /= np.sqrt(np.matmul(np.transpose(vector), vector))
             normal = np.array([[-vector.item(1)], 
-                                [ vector.item(0)]])
-            poly_points = [self.points[:, [point]] + normal*self.width/2, self.points[:, [point]] - normal*self.width/2,
-                           self.points[:, [point+1]] - normal*self.width/2, self.points[:, [point+1]] + normal*self.width/2]
-            pygame.draw.polygon(self.window, self.colour, poly_points)
+                               [ vector.item(0)]])
+            new_poly = [self.points[:, [point]] + normal*self.width/2, self.points[:, [point]] - normal*self.width/2,
+                        self.points[:, [point+1]] - normal*self.width/2, self.points[:, [point+1]] + normal*self.width/2]
+            for point in range(len(new_poly)):
+                new_poly[point] = [new_poly[point].item(0), new_poly[point].item(1)]
+            self.poly_points.append(new_poly)
+        
+
+    def render(self):
+        for point in range(np.shape(self.points)[1]):
+            point = [self.points[:,[point]].item(0), self.points[:,[point]].item(1)]
+            pygame.draw.circle(self.window, self.colour, point, int(self.width/2))
+        for poly in self.poly_points:
+            pygame.draw.polygon(self.window, self.colour, poly)
 
 
     def on_track(self, coords):

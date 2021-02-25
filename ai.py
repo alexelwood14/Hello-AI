@@ -9,16 +9,17 @@ class AI():
         self.agents_num = agents_num
         self.shape = [9, [10], 4]
         self.track = track
-        self.agents = np.array([])
+        self.agents = []
         for num in range(self.agents_num):
             if num % 4 == 0:
-                self.agents = np.append(self.agents, [Agent(self.window, self.track, self.shape, True)])
+                self.agents.append(Agent(self.window, self.track, self.shape, True))
             else:
-                self.agents = np.append(self.agents, [Agent(self.window, self.track, self.shape)])
+                self.agents.append(Agent(self.window, self.track, self.shape))
 
-        f = open("data/average_progress", "w")
+        f = open("logs/average_progress", "w")
         f.write("AVG_PROGRESS")
         f.close()
+
 
     def run(self, frame_time):
         for agent in self.agents:
@@ -29,32 +30,37 @@ class AI():
         for agent in self.agents:
             agent.render()
 
-    
-    def sort_agents(self):
-        temp_agents = np.copy(self.agents)
-        sorted_agents = np.array([])
-        for i in range(self.agents_num):
-            highest, index = self.find_top_agent(temp_agents)
-            sorted_agents = np.append(sorted_agents, [highest])
-            temp_agents = np.delete(temp_agents, index)
+
+    def merge(self, a1, a2):
+        out = []
+        while len(a1) > 0 and len(a2) > 0:
+            if a1[0] <= a2[0]:
+                out.append(a1[0])
+                a1.pop(0)
+            else:
+                out.append(a2[0])
+                a2.pop(0)
         
-        self.agents = np.flip(sorted_agents)
+        if len(a1) == 0:
+            out.extend(a2)
+        elif len(a2) == 0:
+            out.extend(a1)
 
-    
-    def find_top_agent(self, temp_agents):
-        index = 0
-        highest = self.agents[index]
-        for agent in range(1, len(temp_agents)):
-            if self.agents[agent].get_progress() > highest.get_progress():
-                highest = self.agents[agent]
-                index = agent
+        return out
 
-        return highest, index
+    def merge_sort(self, array):
+        if len(array) <= 1:
+            return array
+        middle = int(len(array) / 2)
+        r1 = self.merge_sort(array[0:middle])
+        r2 = self.merge_sort(array[middle : len(array)])
+        array = self.merge(r1, r2)
+        return array
 
 
     def next_gen(self):
-        self.sort_agents()
-        
+        self.agents = self.merge_sort(self.agents)
+
         #Create an array of parents
         parents = []
         for i in range(int(self.agents_num/10)):
@@ -62,47 +68,33 @@ class AI():
 
         #Copy cars to a new array
         start_ang = self.track.get_start_ang()
-        new_agents = []
-        for agent in range(self.agents_num):
-            if agent % 4 == 0:
-                new_agents.append(Agent(self.window, self.track, self.shape, True))
-            else:
-                new_agents.append(Agent(self.window, self.track, self.shape))
-
-        for agent in range(self.agents_num):
-            new_agents[agent].set_biases(self.agents[agent].get_biases())
-            new_agents[agent].set_weights(self.agents[agent].get_weights())        
+        for agent in range(len(self.agents)):
+            self.agents[agent].reset()   
 
         #Replace least performing cars with children of parents and mutate
         for i in range(3):
             for agent in range(len(parents)):
-                new_agents[agent + (i*10)].set_biases(parents[agent].get_biases())
-                new_agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
-                new_agents[agent + (i*10)].mutate_biases()
-                new_agents[agent + (i*10)].mutate_weights()
-                
-        self.agents = new_agents
-
-
-    def gen_over(self):
-        pass
-
+                self.agents[agent + (i*10)].set_biases(parents[agent].get_biases())
+                self.agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
+                self.agents[agent + (i*10)].mutate_biases()
+                self.agents[agent + (i*10)].mutate_weights()
+        
 
     def write_progress(self):
         average_progress = 0
         for agent in self.agents:
             average_progress += agent.get_progress()
         average_progress /= self.agents_num
-        f = open("data/average_progress", "a")
+        f = open("logs/average_progress", "a")
         f.write("\n")
         f.write(str(average_progress))
         f.close()
 
 
     def write_snapshot(self):
-        f = open("data\snapshot", "w")
+        f = open("logs\snapshot", "w")
         f.close()
-        f = open("data\snapshot", "a")
+        f = open("logs\snapshot", "a")
 
         for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
             f.write("NETWORK_{}\n".format(agent))
@@ -126,6 +118,10 @@ class Agent():
         self.neural_net = neural_network.Neural_Network(self.window, self.shape)
 
 
+    def __le__(self, other):
+        return self.get_progress() <= other.get_progress()
+
+
     def run(self, frame_time):
         if not self.car.get_crashed():
             self.car.find_distances()
@@ -140,6 +136,10 @@ class Agent():
     def render(self):
         if self.renderable:
             self.car.render()
+
+
+    def reset(self):
+        self.car = car_o.Car(self.window, self.track, 10)
 
     
     def get_progress(self):

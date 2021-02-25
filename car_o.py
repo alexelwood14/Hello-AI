@@ -89,53 +89,6 @@ class Car():
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
-
-    def manual_input(self, frame_time):
-        pressed = pygame.key.get_pressed()
-
-        #Rotation inputs
-        if (pressed[pygame.K_a] and not pressed[pygame.K_d]) or (not pressed[pygame.K_a] and pressed[pygame.K_d]):
-            if pressed[pygame.K_a] and not pressed[pygame.K_d]:
-                self.wheel_vel = -2
-            elif not pressed[pygame.K_a] and pressed[pygame.K_d]:
-                self.wheel_vel = 2
-            
-        else:
-            if self.wheel_ang > 0.01:
-                self.wheel_vel = -2
-            elif self.wheel_ang < -0.01:
-                self.wheel_vel = 2
-            else:
-                self.wheel_vel = 0
-
-        #Limit rotation angle to maximum
-        self.wheel_ang += self.wheel_vel * frame_time
-        if self.wheel_ang > self.max_wheel_ang:
-            self.wheel_ang = self.max_wheel_ang
-        elif self.wheel_ang < -self.max_wheel_ang:
-            self.wheel_ang = -self.max_wheel_ang
-
-        
-        #Translation inputs
-        if pressed[pygame.K_w] and not pressed[pygame.K_s]:
-            self.acc = 100
-        elif not pressed[pygame.K_w] and pressed[pygame.K_s]:
-            self.acc = -100
-        else:
-            if self.speed > 0.0001:
-                self.acc = -50
-            elif self.speed < 0.0001:
-                self.acc = 50
-            else:
-                self.acc = 0
-
-        #Limit speed to terminal speed
-        if self.speed > self.term_speed:
-            self.speed = self.term_speed
-        elif self.speed < -self.term_speed/3:
-            self.speed = -self.term_speed/3
-
-
     def network_inputs(self, frame_time):
         #Calculate network speed inputs
         if self.speed >= 0:
@@ -177,13 +130,6 @@ class Car():
             
 
 #----------------------------------------------------------------------------------------------------------------------------------
-    def inputs(self, frame_time):
-        if self.manual:
-            self.manual_input(frame_time)
-        else:
-            self.network_input(frame_time)
-
-
     def dynamics(self, frame_time):  
         #Recalculate wheel positions
         wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
