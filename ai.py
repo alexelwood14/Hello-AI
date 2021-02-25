@@ -16,9 +16,8 @@ class AI():
             else:
                 self.agents.append(Agent(self.window, self.track, self.shape))
 
-        f = open("logs/average_progress", "w")
-        f.write("AVG_PROGRESS")
-        f.close()
+        with open("logs/average_progress", "w") as f:
+            f.write("AVG_PROGRESS")
 
 
     def run(self, frame_time):
@@ -52,7 +51,7 @@ class AI():
         if len(array) <= 1:
             return array
         middle = int(len(array) / 2)
-        r1 = self.merge_sort(array[0:middle])
+        r1 = self.merge_sort(array[0 : middle])
         r2 = self.merge_sort(array[middle : len(array)])
         array = self.merge(r1, r2)
         return array
@@ -93,28 +92,24 @@ class AI():
         for agent in self.agents:
             average_progress += agent.get_progress()
         average_progress /= self.agents_num
-        f = open("logs/average_progress", "a")
-        f.write("\n")
-        f.write(str(average_progress))
-        f.close()
+        with open("logs/average_progress", "a") as f:
+            f.write("\n")
+            f.write(str(average_progress))
 
 
     def write_snapshot(self):
-        f = open("logs\snapshot", "w")
-        f.close()
-        f = open("logs\snapshot", "a")
+        with open("logs\snapshot", "w") as f:
+            pass
 
-        for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
-            f.write("NETWORK_{}\n".format(agent))
-            weights = self.agents[agent].get_weights()
-            biases = self.agents[agent].get_biases()
-            f.write(str(weights))
-            f.write("\n")
-            f.write(str(biases))
-            f.write("\n")
-        
-        f.close()
-
+        with open("logs\snapshot", "a") as f:
+            for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
+                f.write("NETWORK_{}\n".format(agent))
+                weights = self.agents[agent].get_weights()
+                biases = self.agents[agent].get_biases()
+                f.write(str(weights))
+                f.write("\n")
+                f.write(str(biases))
+                f.write("\n")
 
 class Agent():
     def __init__(self, window, track, shape, renderable=False):
