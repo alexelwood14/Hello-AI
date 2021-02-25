@@ -16,7 +16,7 @@ class AI():
             else:
                 self.agents.append(Agent(self.window, self.track, self.shape))
 
-        f = open("data/average_progress", "w")
+        f = open("logs/average_progress", "w")
         f.write("AVG_PROGRESS")
         f.close()
 
@@ -85,16 +85,16 @@ class AI():
         for agent in self.agents:
             average_progress += agent.get_progress()
         average_progress /= self.agents_num
-        f = open("data/average_progress", "a")
+        f = open("logs/average_progress", "a")
         f.write("\n")
         f.write(str(average_progress))
         f.close()
 
 
     def write_snapshot(self):
-        f = open("data\snapshot", "w")
+        f = open("logs\snapshot", "w")
         f.close()
-        f = open("data\snapshot", "a")
+        f = open("logs\snapshot", "a")
 
         for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
             f.write("NETWORK_{}\n".format(agent))
