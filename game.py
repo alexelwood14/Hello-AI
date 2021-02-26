@@ -87,7 +87,8 @@ def race(window, clock, action, mouse_used):
         if simulating:
             if not paused:
                 race_ai.run(frame_time)
-            race_ai.render()
+            if wait_time > 0.5:
+                race_ai.render()
 
             simulating = False
             if not race_ai.gen_over():

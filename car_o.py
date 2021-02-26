@@ -37,14 +37,14 @@ class Wheel():
 #----------------------------------------------------------------------------------------------------------------------------------
 
 class Car():
-    def __init__(self, window, track, size):
+    def __init__(self, window, track, size, colour=const.COL["red"]):
         self.window = window
         self.size = size
         self.crashed = False
         self.progress = 0
         self.manual = False
         self.track = track
-        self.colour = const.COL["red"]
+        self.colour = colour
 
         #Setup dynamic attributes
         self.pos = track.get_start()

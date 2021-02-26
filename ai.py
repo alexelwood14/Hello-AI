@@ -30,47 +30,17 @@ class AI():
             agent.render()
 
 
-    def merge(self, a1, a2):
-        out = []
-        while len(a1) > 0 and len(a2) > 0:
-            if a1[0] <= a2[0]:
-                out.append(a1[0])
-                a1.pop(0)
-            else:
-                out.append(a2[0])
-                a2.pop(0)
-        
-        if len(a1) == 0:
-            out.extend(a2)
-        elif len(a2) == 0:
-            out.extend(a1)
-
-        return out
-
-
-    def merge_sort(self, array):
-        if len(array) <= 1:
-            return array
-        middle = int(len(array) / 2)
-        r1 = self.merge_sort(array[0 : middle])
-        r2 = self.merge_sort(array[middle : len(array)])
-        array = self.merge(r1, r2)
-        return array
-
-
     def next_gen(self):
-        self.agents = self.merge_sort(self.agents)
-        for agent in range(len(self.agents)):
-            self.agents[agent].reset()   
+        self.agents = sorted(self.agents)
 
         for i in range(self.agents_num):
-            self.agents[i].set_colour(const.COL["blue"])
+            self.agents[i].reset(const.COL["blue"])  
 
         #Create an array of parents
         parents = []
         for i in range(int(self.agents_num/10)):
             parents.append(self.agents[int(9*self.agents_num/10) + i])
-            self.agents[int(9*self.agents_num/10) + i].set_colour(const.COL["green"])
+            self.agents[int(9*self.agents_num/10) + i].reset(const.COL["green"])
 
         start_ang = self.track.get_start_ang()
 
@@ -81,7 +51,7 @@ class AI():
                 self.agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
                 self.agents[agent + (i*10)].mutate_biases()
                 self.agents[agent + (i*10)].mutate_weights()
-                self.agents[agent + (i*10)].set_colour(const.COL["red"])
+                self.agents[agent + (i*10)].reset()
 
 
     def gen_over(self):
@@ -129,6 +99,10 @@ class Agent():
     def __le__(self, other):
         return self.get_progress() <= other.get_progress()
 
+    
+    def __lt__(self, other):
+        return self.get_progress() < other.get_progress()
+
 
     def run(self, frame_time):
         if not self.car.get_crashed():
@@ -146,8 +120,8 @@ class Agent():
             self.car.render()
 
 
-    def reset(self):
-        self.car = car_o.Car(self.window, self.track, 10)
+    def reset(self, colour=const.COL["red"]):
+        self.car = car_o.Car(self.window, self.track, 10, colour)
 
     
     def get_progress(self):
