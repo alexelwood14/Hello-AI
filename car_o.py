@@ -74,6 +74,7 @@ class Car():
         #Setup steering normals
         self.front_axel = self.pos + np.array([[0.0], [self.size * 1.6]])
         self.rear_axel = self.pos + np.array([[0.0], [-self.size * 1.6]])
+        self.wheel_base_len = np.linalg.norm(self.rear_axel - self.front_axel)
         self.turning_point = np.array([[0.0], [0.0]])
 
         #Setup normals
@@ -151,13 +152,7 @@ class Car():
                                                          [1.0, 0.0,  0.0, -1.0/np.sqrt(2),  1.0/np.sqrt(2)]]))
 
         #Find turing point
-        if (self.normals.item((0, 1)) * self.front_norm.item(1) - self.normals.item((1, 1)) * self.front_norm.item(0)) != 0:
-            mu = ((self.normals.item((0, 1))*(self.rear_axel.item(1) - self.front_axel.item(1)) - self.normals.item((1, 1))*(self.rear_axel.item(0) - self.front_axel.item(0)))
-                  / (self.normals.item((0, 1)) * self.front_norm.item(1) - self.normals.item((1, 1)) * self.front_norm.item(0)))
-            self.turning_point = self.front_axel + mu * self.front_norm + self.pos
-        else:
-            mu = 100000
-            self.turning_point = self.rear_axel + mu * self.rear_norm + self.pos
+        self.turning_point = self.pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
 
         #Move car geomery away from turning point
         self.points_mat = self.points_mat - self.turning_point
