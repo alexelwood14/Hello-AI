@@ -59,7 +59,7 @@ class Car():
                                  [np.sin(self.ang),  np.cos(self.ang)]])
 
         self.wheel_vel = 0.0
-        self.wheel_ang = 0.00001
+        self.wheel_ang = 0.0
         self.max_wheel_ang = np.pi/4
 
         #Setup geometry matrix
@@ -100,7 +100,7 @@ class Car():
             speed_backwards = 0.0
         else:
             speed_forwards = 0.0
-            speed_backwards = self.speed / self.term_speed/3
+            speed_backwards = self.speed / self.term_speed / 3
 
         #Calculate network turning inputs
         if self.wheel_ang >= 0:
@@ -153,7 +153,10 @@ class Car():
                                                          [1.0, 0.0,  0.0, -1.0/np.sqrt(2),  1.0/np.sqrt(2)]]))
 
         #Find turing point
-        self.turning_point = self.pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
+        try:
+            self.turning_point = self.pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
+        except ZeroDivisionError:
+            self.turning_point = self.pos + 999999
 
         #Move car geomery away from turning point
         self.points_mat = self.points_mat - self.turning_point
@@ -163,8 +166,7 @@ class Car():
         self.speed += self.acc * frame_time
         displacement = self.speed * frame_time
         angle = displacement / radius
-        if self.wheel_ang < 0:
-            angle *= -1
+        if self.wheel_ang < 0: angle *= -1
         self.ang += angle
         self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
                                  [np.sin(self.ang), np.cos(self.ang)]])
@@ -175,7 +177,7 @@ class Car():
         self.points_mat = np.matmul(translation_mat, self.points_mat)
 
         #Move car geometry back from turning point
-        self.points_mat = self.points_mat + self.turning_point
+        self.points_mat += self.turning_point
 
         #Update position based on average points
         self.pos = np.average(self.points_mat, 1)
