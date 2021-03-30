@@ -9,7 +9,7 @@ from pygame.locals import *
 
 
 def get_track_points(file, asp_ratio):
-    f = open("data\{}".format(file), "r")
+    f = open("data\\{}".format(file), "r")
     line = f.readline()
     point = line.split()
     track_points = asp_ratio * np.matrix([[int(point[0])],
@@ -33,7 +33,7 @@ def race(window, clock, action, mouse_used):
     agents_num = 100
 
     asp_ratio = window.get_size()[1] / const.BASE_RES
-    track_points = get_track_points("track1", asp_ratio)
+    track_points = get_track_points("track3", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
     race_ai = ai.AI(window, track, agents_num) 

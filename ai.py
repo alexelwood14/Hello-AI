@@ -97,7 +97,7 @@ class Agent():
 
 
     def __le__(self, other):
-        return self.get_progress() <= other.get_progress()
+        return self.get_progress() <= other.get_progress(   )
 
     
     def __lt__(self, other):

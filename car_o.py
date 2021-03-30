@@ -157,7 +157,6 @@ class Car():
         #Move car geomery away from turning point
         self.points_mat = self.points_mat - self.turning_point
 
-        
         #Calculate rotation angle
         radius = np.linalg.norm(self.pos - self.turning_point)
         self.speed += self.acc * frame_time

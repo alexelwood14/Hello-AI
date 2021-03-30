@@ -1,4 +1,5 @@
 import const
+import copy
 import numpy as np
 
 class Neural_Network():
@@ -105,15 +106,12 @@ class Neural_Network():
 
 
     def set_weights(self, weights):
-        for layer in range(len(weights)):
-            for node in range(len(self.weights[layer])):
-                self.weights[layer][node] = weights[layer][node][:]
+        self.weights = copy.deepcopy(weights)
 
 
     def set_biases(self, biases):
-        for layer in range(len(biases)):
-            for b in range(len(biases[layer])):
-                self.biases[layer][b] = biases[layer][b]
+        self.biases = copy.deepcopy(biases)
+
 
     def crossover(self, parent1, parent2):
         biases1 = parent1.get_biases()
