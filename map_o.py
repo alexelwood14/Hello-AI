@@ -21,9 +21,9 @@ class Map():
         vector = self.lines[:, [0]]
         vector /= np.linalg.norm(vector)
         if (vector.item(1) < 0):
-            self.start_ang = np.arccos(np.matmul(np.array([1,0]), vector).item())
-        else:
             self.start_ang = np.arccos(-np.matmul(np.array([1,0]), vector).item())
+        else:
+            self.start_ang = np.arccos(np.matmul(np.array([1,0]), vector).item())
 
         self.poly_points = []
         for point in range(np.shape(self.points)[1]-1):
