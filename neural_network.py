@@ -13,87 +13,19 @@ class Neural_Network():
         mean = 0
         std_dev = 0.1
         self.layers = len(hidden) + 1
+
+        #Initiate weights and biases for the first hidden layer
+        self.biases.append([np.random.normal(mean, std_dev) for i in range(hidden[0])])
+        self.weights.append([[np.random.normal(mean, std_dev) for i in range(inputs)] for j in range(hidden[0])])
         
-        #---INITIATE HIDDEN LAYER BIASES AND NODES---
-        
-        #Initiate weights leading to hidden layers
-        for layer in range(len(hidden)):
-            #Setup biases matrix using first element
-            bias = np.random.normal(mean, std_dev)
-            temp_3 = np.array([bias])
+        #Initiate weights and biases for subsequent hidden layers
+        for layer in range(1, len(hidden)):
+            self.biases.append([np.random.normal(mean, std_dev) for i in range(hidden[layer])])
+            self.weights.append([[np.random.normal(mean, std_dev) for i in range(hidden[layer-1])] for j in range(hidden[layer])])
 
-            #Append all other biases to the matrix
-            for i in range(1, hidden[layer]):
-                bias = np.random.normal(mean, std_dev)
-                temp_3 = np.append(temp_3, bias)
-
-            self.biases.append(temp_3)
-
-            #---INITATE HIDDEN LAYER WEIGHTS AND AXONS
-
-            #Setup weights matrix using first weights of array
-            temp_2 = []
-            if layer == 0:
-                for j in range(inputs):
-                    weight = np.random.normal(mean, std_dev)
-                    temp_2.append(weight)
-            else:
-                for j in range(hidden[layer-1]):
-                    weight = np.random.normal(mean, std_dev)
-                    temp_2.append(weight)
-            temp_1 = np.array([temp_2])
-
-            #Append all other weights to the martix
-            for i in range(1, hidden[layer]):
-                temp_2 = []
-
-                if layer == 0:
-                    for j in range(inputs):
-                        weight = np.random.normal(mean, std_dev)
-                        temp_2.append(weight)
-                else:
-                    for j in range(hidden[layer-1]):
-                        weight = np.random.normal(mean, std_dev)
-                        temp_2.append(weight)
-
-                temp_1 = np.append(temp_1, [temp_2], axis=0)
-                    
-
-            self.weights.append(temp_1)
-
-
-
-        #---INITIATE OUTPUT BIASES AND NODES---
-
-        #Setup biases matrix using first element
-        bias = np.random.normal(mean, std_dev)
-        temp_3 = np.array([bias])
-
-        #Append all other biases to the matrix
-        for i in range(1, outputs):
-            bias = np.random.normal(mean, std_dev)
-            temp_3 = np.append(temp_3, bias)
-        self.biases.append(temp_3)
-
-
-        #---INITIATE OUTPUT WEIGHTS AND AXONS---
-
-        #Setup weights matrix using first weights of array
-        temp_2 = []
-        for j in range(hidden[len(hidden)-1]):
-            weight = np.random.normal(mean, std_dev)
-            temp_2.append(np.random.normal(mean, std_dev))
-        temp_1 = np.array([temp_2])
-
-        #Append all other weights to the matrix
-        for i in range(1, outputs):
-            temp_2 = []
-            for j in range(hidden[len(hidden)-1]):
-                weight = np.random.normal(mean, std_dev)
-                temp_2.append(np.random.normal(mean, std_dev))
-            temp_1 = np.append(temp_1, [temp_2], axis=0)
-
-        self.weights.append(temp_1)
+        #Initiate weights and biases for the output layer
+        self.biases.append([np.random.normal(mean, std_dev) for i in range(outputs)])
+        self.weights.append([[np.random.normal(mean, std_dev) for i in range(hidden[-1])] for j in range(outputs)])
 
 
     def process(self, layer_data):
