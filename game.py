@@ -41,7 +41,7 @@ def race(window, clock, action, mouse_used):
     while action == const.MODE.RACE:
         window.fill(const.COL["black"])
         frame_time = clock.tick() / 1000
-        if wait_time > 0.5:
+        if wait_time > 1:
             paused = False 
         else:
             wait_time += frame_time

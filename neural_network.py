@@ -92,4 +92,4 @@ class Neural_Network():
     
 
     def get_biases(self):
-        return self.biases        
+        return self.biases

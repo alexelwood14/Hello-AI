@@ -69,8 +69,9 @@ class Car():
         self.points_mat += self.pos
 
         #Default wheel positions
-        self.wheel_pos = np.array([[-self.size,      self.size,     self.size,    -self.size,     0,              0], 
-                                    [-self.size*1.6, -self.size*1.6, self.size*1.6, self.size*1.6, self.size*1.6, -self.size*1.6]])
+        self.wheel_pos = np.array([[ self.size,     -self.size,     -self.size,    self.size,     0,              0], 
+                                   [-self.size*1.6, -self.size*1.6, self.size*1.6, self.size*1.6, self.size*1.6, -self.size*1.6]])
+        self.wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
 
         #Setup steering normals
         self.front_axel = self.pos + np.array([[0.0], [self.size * 1.6]])
@@ -86,10 +87,11 @@ class Car():
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) - self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.size, self.pos.item(1) + self.size * 1.6], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) - self.size, self.pos.item(1) + self.size * 1.6], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,0)), self.pos.item(1) + self.wheel_pos.item((1,0))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,1)), self.pos.item(1) + self.wheel_pos.item((1,1))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,2)), self.pos.item(1) + self.wheel_pos.item((1,2))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,3)), self.pos.item(1) + self.wheel_pos.item((1,3))], size / 3))
+        for wheel in self.wheels: wheel.set_ang(self.ang)
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -136,11 +138,11 @@ class Car():
 #----------------------------------------------------------------------------------------------------------------------------------
     def dynamics(self, frame_time):  
         #Recalculate wheel positions
-        wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
+        #wheel_pos = self.wheel_pos
 
         #Find axel pivot points
-        self.front_axel = wheel_pos[:, [4]]
-        self.rear_axel = wheel_pos[:, [5]]
+        self.front_axel = self.wheel_pos[:, [4]]
+        self.rear_axel = self.wheel_pos[:, [5]]
 
         #Recalculate wheel matrix
         self.front_mat = np.array([[np.cos(self.wheel_ang + self.ang), -np.sin(self.wheel_ang + self.ang)],
@@ -156,7 +158,7 @@ class Car():
         try:
             self.turning_point = self.pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
         except ZeroDivisionError:
-            self.turning_point = self.pos + 999999
+            self.turning_point = self.pos + self.normals[:, [1]] * 999999
 
         #Move car geomery away from turning point
         self.points_mat = self.points_mat - self.turning_point
@@ -183,13 +185,13 @@ class Car():
         self.pos = np.average(self.points_mat, 1)
 
         #Recalculate wheel positions
-        wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
+        self.wheel_pos = np.matmul(translation_mat, self.wheel_pos)
         
         #Apply new wheel_positions
-        self.wheels[0].set_pos([wheel_pos.item((0,0)) + self.pos.item(0), wheel_pos.item((1,0)) + self.pos.item(1)])
-        self.wheels[1].set_pos([wheel_pos.item((0,1)) + self.pos.item(0), wheel_pos.item((1,1)) + self.pos.item(1)])
-        self.wheels[2].set_pos([wheel_pos.item((0,2)) + self.pos.item(0), wheel_pos.item((1,2)) + self.pos.item(1)])
-        self.wheels[3].set_pos([wheel_pos.item((0,3)) + self.pos.item(0), wheel_pos.item((1,3)) + self.pos.item(1)])
+        self.wheels[0].set_pos([self.wheel_pos.item((0,0)) + self.pos.item(0), self.wheel_pos.item((1,0)) + self.pos.item(1)])
+        self.wheels[1].set_pos([self.wheel_pos.item((0,1)) + self.pos.item(0), self.wheel_pos.item((1,1)) + self.pos.item(1)])
+        self.wheels[2].set_pos([self.wheel_pos.item((0,2)) + self.pos.item(0), self.wheel_pos.item((1,2)) + self.pos.item(1)])
+        self.wheels[3].set_pos([self.wheel_pos.item((0,3)) + self.pos.item(0), self.wheel_pos.item((1,3)) + self.pos.item(1)])
 
         #Apply new wheel rotations
         self.wheels[0].set_ang(self.ang)
@@ -263,7 +265,7 @@ class Car():
     def set_ang(self, ang):
         self.ang = ang
         self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
-                                   [np.sin(self.ang), np.cos(self.ang)]])
+                                 [np.sin(self.ang), np.cos(self.ang)]])
 
 
     def get_points_mat(self):
