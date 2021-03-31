@@ -2,6 +2,7 @@ import const
 import neural_network
 import car_o
 import numpy as np
+import time
 
 class AI():
     def __init__(self, window, track, agents_num):
@@ -10,6 +11,7 @@ class AI():
         self.shape = [9, [10], 4]
         self.track = track
         self.agents = []
+        self.__init_time = name = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
         for num in range(self.agents_num):
             if num % 4 == 0:
                 self.agents.append(Agent(self.window, self.track, self.shape, True))
@@ -67,23 +69,20 @@ class AI():
         for agent in self.agents:
             average_progress += agent.get_progress()
         average_progress /= self.agents_num
-        with open("logs/average_progress", "a") as f:
+        with open("logs/average_progress", "at") as f:
             f.write("\n")
             f.write(str(average_progress))
 
 
     def write_snapshot(self):
-        with open("logs\snapshot", "w") as f:
-            pass
-
-        with open("logs\snapshot", "a") as f:
+        with open("logs\\{}".format(self.__init_time), "wt") as f:
             for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
                 f.write("NETWORK_{}\n".format(agent))
                 weights = self.agents[agent].get_weights()
                 biases = self.agents[agent].get_biases()
-                f.write(str(weights))
+                f.write(str(weights).replace('[', '').replace(']', ''))
                 f.write("\n")
-                f.write(str(biases))
+                f.write(str(biases).replace('[', '').replace(']', ''))
                 f.write("\n")
 
 class Agent():
