@@ -54,7 +54,7 @@ class Car():
         self.term_speed = 200*window.get_size()[1]/const.BASE_RES 
 
 
-        self.ang = np.pi * 3 / 2 + track.start_ang
+        self.ang = track.start_ang + np.pi / 2
         self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
                                  [np.sin(self.ang),  np.cos(self.ang)]])
 
