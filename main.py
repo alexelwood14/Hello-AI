@@ -9,7 +9,7 @@ from pygame.locals import *
 class Hello_AI():
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.resolution, self.windowed, self.ai_mode, self.target = self.get_config()
+        self.resolution, self.windowed, self.ai_mode, self.snapshot = self.get_config()
         pygame.init()
 
         if self.windowed:
@@ -30,7 +30,7 @@ class Hello_AI():
             elif self.mode == const.MODE.SETTINGS:
                 self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
             elif self.mode == const.MODE.RACE:
-                self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.ai_mode, self.target, self.mouse_used)
+                self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.ai_mode, self.snapshot, self.mouse_used)
             elif self.mode == const.MODE.QUIT:
                 pygame.quit()
                 quit()
@@ -48,8 +48,8 @@ class Hello_AI():
         else: raise Exception('Invalid windowed type in config file')
 
         ai_mode = const.AI_MODE[f.readline().replace('\n', '')]
-        target = f.readline().replace('\n', '')
-        return resolution, windowed, ai_mode, target
+        snapshot = f.readline().replace('\n', '')
+        return resolution, windowed, ai_mode, snapshot
                 
 
 #----------------------------------------------------------------------------------------------------------------------------------

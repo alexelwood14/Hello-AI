@@ -10,8 +10,12 @@ class AI():
         self.agents_num = agents_num
         self.shape = [9, 10, 4]
         self.track = track
-        weights, biases = self.parse_snapshot(target)
-        self.agents = [Agent(self.window, self.track, self.shape, ai_mode, weights[i], biases[i], True) for i in range(agents_num)]
+        self.gen = 0
+        if ai_mode != const.AI_MODE.START: 
+            weights, biases = self.parse_snapshot(target)
+            self.agents = [Agent(self.window, self.track, self.shape, ai_mode, weights[i], biases[i], True) for i in range(agents_num)]
+        else:
+            self.agents = [Agent(self.window, self.track, self.shape, ai_mode, None, None, True) for i in range(agents_num)]
         self.__init_time = name = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
 
         with open("logs/average_progress", "w") as f:
@@ -70,8 +74,9 @@ class AI():
             f.write(str(average_progress))
 
 
-    def write_snapshot(self):
+    def write_snapshot(self, gen):
         with open("logs\\{}".format(self.__init_time), "wt") as f:
+            f.write(str(gen) + '\n')
             for agent in range(self.agents_num):
                 f.write("NETWORK_{}\n".format(agent))
                 weights = self.agents[agent].get_weights()
@@ -81,14 +86,15 @@ class AI():
                 f.write(str(biases).replace('[', '').replace(']', ''))
                 f.write("\n")
 
-    def parse_snapshot(self, target):
+    def parse_snapshot(self, snapshot):
         all_weights = []
         all_biases = []
-        with open('logs\\{}'.format(target), 'rt') as f:
-            file = [f.readline().replace('\n', '') for i in range(self.agents_num * 3)]
-        for line in range(len(file)):
-            if (line - 1) % 3 == 0: all_weights.append(list(np.float_(file[line].split(', '))))
-            if (line - 2) % 3 == 0: all_biases.append(list(np.float_(file[line].split(', '))))
+        with open('logs\\{}'.format(snapshot), 'rt') as f:
+            file = [f.readline().replace('\n', '') for i in range(self.agents_num * 3+1)]
+            self.gen = int(file[0])
+        for line in range(1, len(file)):
+            if (line - 2) % 3 == 0: all_weights.append(list(np.float_(file[line].split(', '))))
+            if line % 3 == 0: all_biases.append(list(np.float_(file[line].split(', '))))
         return all_weights, all_biases
 
 class Agent():

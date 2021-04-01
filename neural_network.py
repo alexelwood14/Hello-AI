@@ -9,7 +9,7 @@ class Neural_Network():
         self.biases = []
         self.shape = shape
         self.inputs = shape[0]
-        self.hidden = shape[1:-2]
+        self.hidden = shape[1:-1]
         self.outputs = shape[-1]
         self.mean = 0
         self.std_dev = 0.1
