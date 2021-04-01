@@ -23,7 +23,7 @@ def get_track_points(file, asp_ratio):
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def race(window, clock, action, mouse_used):
+def race(window, clock, action, ai_mode, target, mouse_used):
     paused = True
     display_debug = True
     simulating = True
@@ -36,7 +36,7 @@ def race(window, clock, action, mouse_used):
     track_points = get_track_points("track3", asp_ratio)
     track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
 
-    race_ai = ai.AI(window, track, agents_num) 
+    race_ai = ai.AI(window, track, agents_num, ai_mode, target) 
     
     while action == const.MODE.RACE:
         window.fill(const.COL["black"])

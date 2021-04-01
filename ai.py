@@ -5,18 +5,14 @@ import numpy as np
 import time
 
 class AI():
-    def __init__(self, window, track, agents_num):
+    def __init__(self, window, track, agents_num, ai_mode, target):
         self.window = window
         self.agents_num = agents_num
-        self.shape = [9, [10], 4]
+        self.shape = [9, 10, 4]
         self.track = track
-        self.agents = []
+        weights, biases = self.parse_snapshot(target)
+        self.agents = [Agent(self.window, self.track, self.shape, ai_mode, weights[i], biases[i], True) for i in range(agents_num)]
         self.__init_time = name = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
-        for num in range(self.agents_num):
-            if num % 4 == 0:
-                self.agents.append(Agent(self.window, self.track, self.shape, True))
-            else:
-                self.agents.append(Agent(self.window, self.track, self.shape, True))
 
         with open("logs/average_progress", "w") as f:
             f.write("AVG_PROGRESS")
@@ -76,7 +72,7 @@ class AI():
 
     def write_snapshot(self):
         with open("logs\\{}".format(self.__init_time), "wt") as f:
-            for agent in range(int(self.agents_num - self.agents_num/10), self.agents_num):
+            for agent in range(self.agents_num):
                 f.write("NETWORK_{}\n".format(agent))
                 weights = self.agents[agent].get_weights()
                 biases = self.agents[agent].get_biases()
@@ -85,18 +81,29 @@ class AI():
                 f.write(str(biases).replace('[', '').replace(']', ''))
                 f.write("\n")
 
+    def parse_snapshot(self, target):
+        all_weights = []
+        all_biases = []
+        with open('logs\\{}'.format(target), 'rt') as f:
+            file = [f.readline().replace('\n', '') for i in range(self.agents_num * 3)]
+        for line in range(len(file)):
+            if (line - 1) % 3 == 0: all_weights.append(list(np.float_(file[line].split(', '))))
+            if (line - 2) % 3 == 0: all_biases.append(list(np.float_(file[line].split(', '))))
+        return all_weights, all_biases
+
 class Agent():
-    def __init__(self, window, track, shape, renderable=False):
+    def __init__(self, window, track, shape, ai_mode, weights, biases, renderable=False):
         self.window = window
         self.track = track
         self.shape = shape
         self.renderable = renderable
         self.car = car_o.Car(self.window, self.track, 10)
-        self.neural_net = neural_network.Neural_Network(self.window, self.shape)
+        if ai_mode == const.AI_MODE.START: self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
+        elif ai_mode == const.AI_MODE.RESUME: self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
 
 
     def __le__(self, other):
-        return self.get_progress() <= other.get_progress(   )
+        return self.get_progress() <= other.get_progress()
 
     
     def __lt__(self, other):

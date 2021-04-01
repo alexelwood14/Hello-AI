@@ -7,31 +7,18 @@ class Neural_Network():
         self.window = window
         self.weights = []
         self.biases = []
-        inputs = shape[0]
-        hidden = shape[1]
-        outputs = shape[2]
-        mean = 0
-        std_dev = 0.1
-        self.layers = len(hidden) + 1
-
-        #Initiate weights and biases for the first hidden layer
-        self.biases.append([np.random.normal(mean, std_dev) for i in range(hidden[0])])
-        self.weights.append([[np.random.normal(mean, std_dev) for i in range(inputs)] for j in range(hidden[0])])
-        
-        #Initiate weights and biases for subsequent hidden layers
-        for layer in range(1, len(hidden)):
-            self.biases.append([np.random.normal(mean, std_dev) for i in range(hidden[layer])])
-            self.weights.append([[np.random.normal(mean, std_dev) for i in range(hidden[layer-1])] for j in range(hidden[layer])])
-
-        #Initiate weights and biases for the output layer
-        self.biases.append([np.random.normal(mean, std_dev) for i in range(outputs)])
-        self.weights.append([[np.random.normal(mean, std_dev) for i in range(hidden[-1])] for j in range(outputs)])
+        self.shape = shape
+        self.inputs = shape[0]
+        self.hidden = shape[1:-2]
+        self.outputs = shape[-1]
+        self.mean = 0
+        self.std_dev = 0.1
 
 
     def process(self, layer_data):
         layer_data = np.array(layer_data)
                 
-        for layer in range(self.layers):
+        for layer in range(len(self.shape)-1):
             layer_data = 1/(1+np.exp(-(np.matmul(self.weights[layer], layer_data) + self.biases[layer])))
 
         return layer_data
@@ -93,3 +80,40 @@ class Neural_Network():
 
     def get_biases(self):
         return self.biases
+
+
+class Unevolved_Neural_Network(Neural_Network):
+    def __init__(self, window, shape):
+        super().__init__(window, shape)
+
+        #Initiate weights and biases for the first hidden layer
+        self.biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[0])])
+        self.weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.inputs)] for j in range(self.hidden[0])])
+        
+        #Initiate weights and biases for subsequent hidden layers
+        for layer in range(1, len(self.hidden)):
+            self.biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[layer])])
+            self.weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[layer-1])] for j in range(self.hidden[layer])])
+
+        #Initiate weights and biases for the output layer
+        self.biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.outputs)])
+        self.weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[-1])] for j in range(self.outputs)])
+
+
+class Evolved_Neural_Network(Neural_Network):
+    def __init__(self, window, shape, weights, biases):
+        super().__init__(window, shape)
+        assert len(biases) == sum(shape[1:])
+        assert len(weights) == sum([self.shape[i] * self.shape[i-1] for i in range(1, len(self.shape))])
+
+        for i in range(1, len(self.shape)):
+            layer_biases = []
+            layer_weights = []
+            for j in range(self.shape[i]):
+                node_weights = []
+                layer_biases.append(biases.pop(0))
+                for k in range(self.shape[i-1]):
+                    node_weights.append(weights.pop(0))
+                layer_weights.append(node_weights)
+            self.biases.append(layer_biases)
+            self.weights.append(layer_weights)
