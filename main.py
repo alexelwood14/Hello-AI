@@ -35,8 +35,8 @@ class Hello_AI():
                 pygame.quit()
                 quit()
 
-
-    def get_config(self):
+    @staticmethod
+    def get_config():
         resolution = []
         f = open("data\config", "r")
         resolution.append(int(f.readline()))
