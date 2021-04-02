@@ -2,6 +2,7 @@ import const
 import copy
 import numpy as np
 
+
 class Neural_Network():
     def __init__(self, window, shape):
         self.window = window
@@ -14,7 +15,6 @@ class Neural_Network():
         self.mean = 0
         self.std_dev = 0.1
 
-
     def process(self, layer_data):
         layer_data = np.array(layer_data)
                 
@@ -23,14 +23,11 @@ class Neural_Network():
 
         return layer_data
 
-
     def set_weights(self, weights):
         self.weights = copy.deepcopy(weights)
 
-
     def set_biases(self, biases):
         self.biases = copy.deepcopy(biases)
-
 
     def crossover(self, parent1, parent2):
         biases1 = parent1.get_biases()
@@ -52,7 +49,6 @@ class Neural_Network():
                     else:
                         self.weights[layer][node][w] = weights2[layer][node][w]
 
-
     def mutate_biases(self):
         var = 1
         std_dev = var**2 
@@ -61,7 +57,6 @@ class Neural_Network():
                 mutation = np.random.normal(0, std_dev)
                 if abs(mutation) > 2 * np.sqrt(std_dev): 
                     self.biases[layer][bias] += mutation
-
 
     def mutate_weights(self):
         var = 1
@@ -73,10 +68,8 @@ class Neural_Network():
                     if abs(mutation) > 2 * np.sqrt(std_dev):
                         self.weights[layer][node][w] += mutation
 
-        
     def get_weights(self):
-        return self.weights
-    
+        return self.weights    
 
     def get_biases(self):
         return self.biases

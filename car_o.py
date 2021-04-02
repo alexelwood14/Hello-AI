@@ -4,12 +4,13 @@ import map_o
 import numpy as np
 from pygame.locals import *
 
+
 class Wheel():
     def __init__(self, window, colour, pos, size):
         self.window = window
-        self.colour = colour
+        self.__colour = colour
         self.size = size
-        self.pos = np.array([[pos[0]],
+        self.__pos = np.array([[pos[0]],
                               [pos[1]]])
         self.ang = 0.0
         self.mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
@@ -18,14 +19,12 @@ class Wheel():
         self.points_mat = np.array([[-self.size / 2,  self.size / 2, self.size / 2, -self.size / 2],
                                      [-self.size,     -self.size,     self.size,      self.size]])
 
-
     def render(self):
-        points = np.asarray(np.transpose(np.matmul(self.mat, self.points_mat) + self.pos))
-        pygame.draw.polygon(self.window, self.colour, points)
-
+        points = np.asarray(np.transpose(np.matmul(self.mat, self.points_mat) + self.__pos))
+        pygame.draw.polygon(self.window, self.__colour, points)
 
     def set_pos(self, pos):
-        self.pos = np.array([[pos[0]],
+        self.__pos = np.array([[pos[0]],
                               [pos[1]]])
 
     def set_ang(self, ang):
@@ -34,20 +33,18 @@ class Wheel():
                               [np.sin(self.ang),  np.cos(self.ang)]])
 
 
-#----------------------------------------------------------------------------------------------------------------------------------
-
 class Car():
     def __init__(self, window, track, size, colour=const.COL["red"]):
         self.window = window
         self.size = size
         self.crashed = False
-        self.progress = 0
+        self.__progress = 0
         self.manual = False
         self.track = track
-        self.colour = colour
+        self.__colour = colour
 
         #Setup dynamic attributes
-        self.pos = track.get_start()
+        self.__pos = track.start
         self.speed = 0.0
         self.vel = np.array([[0.0],[0.0]])
         self.acc = 0.0
@@ -66,7 +63,7 @@ class Car():
         self.points_mat = np.array([[-self.size,      self.size,     self.size,    -self.size],
                                      [-self.size*2.5, -self.size*2.5, self.size*2.5, self.size*2.5]])
         self.points_mat = np.matmul(self.ang_mat, self.points_mat)
-        self.points_mat += self.pos
+        self.points_mat += self.__pos
 
         #Default wheel positions
         self.wheel_pos = np.array([[ self.size,     -self.size,     -self.size,    self.size,     0,              0], 
@@ -74,8 +71,8 @@ class Car():
         self.wheel_pos = np.matmul(self.ang_mat, self.wheel_pos)
 
         #Setup steering normals
-        self.front_axel = self.pos + np.array([[0.0], [self.size * 1.6]])
-        self.rear_axel = self.pos + np.array([[0.0], [-self.size * 1.6]])
+        self.front_axel = self.__pos + np.array([[0.0], [self.size * 1.6]])
+        self.rear_axel = self.__pos + np.array([[0.0], [-self.size * 1.6]])
         self.wheel_base_len = np.linalg.norm(self.rear_axel - self.front_axel)
         self.turning_point = np.array([[0.0], [0.0]])
 
@@ -87,14 +84,12 @@ class Car():
 
         #Set location of wheels
         self.wheels = []
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,0)), self.pos.item(1) + self.wheel_pos.item((1,0))], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,1)), self.pos.item(1) + self.wheel_pos.item((1,1))], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,2)), self.pos.item(1) + self.wheel_pos.item((1,2))], size / 3))
-        self.wheels.append(Wheel(window, const.COL["grey"], [self.pos.item(0) + self.wheel_pos.item((0,3)), self.pos.item(1) + self.wheel_pos.item((1,3))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.__pos.item(0) + self.wheel_pos.item((0,0)), self.__pos.item(1) + self.wheel_pos.item((1,0))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.__pos.item(0) + self.wheel_pos.item((0,1)), self.__pos.item(1) + self.wheel_pos.item((1,1))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.__pos.item(0) + self.wheel_pos.item((0,2)), self.__pos.item(1) + self.wheel_pos.item((1,2))], size / 3))
+        self.wheels.append(Wheel(window, const.COL["grey"], [self.__pos.item(0) + self.wheel_pos.item((0,3)), self.__pos.item(1) + self.wheel_pos.item((1,3))], size / 3))
         for wheel in self.wheels: wheel.set_ang(self.ang)
 
-
-#----------------------------------------------------------------------------------------------------------------------------------
     def network_inputs(self, frame_time):
         #Calculate network speed inputs
         if self.speed >= 0:
@@ -117,7 +112,6 @@ class Car():
 
         return inputs
 
-
     def network_outputs(self, inputs, frame_time):
         self.acc = (inputs[0] - inputs[1]) * 200
         self.wheel_vel = (inputs[2] - inputs[3]) * 2
@@ -134,8 +128,6 @@ class Car():
         elif self.speed < -self.term_speed/3:
             self.speed = -self.term_speed/3
             
-
-#----------------------------------------------------------------------------------------------------------------------------------
     def dynamics(self, frame_time):  
         #Recalculate wheel positions
         #wheel_pos = self.wheel_pos
@@ -156,15 +148,15 @@ class Car():
 
         #Find turing point
         try:
-            self.turning_point = self.pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
+            self.turning_point = self.__pos + self.rear_axel + (self.wheel_base_len * self.normals[:, [1]] / -np.tan(self.wheel_ang))
         except ZeroDivisionError:
-            self.turning_point = self.pos + self.normals[:, [1]] * 999999
+            self.turning_point = self.__pos + self.normals[:, [1]] * 999999
 
         #Move car geomery away from turning point
         self.points_mat = self.points_mat - self.turning_point
 
         #Calculate rotation angle
-        radius = np.linalg.norm(self.pos - self.turning_point)
+        radius = np.linalg.norm(self.__pos - self.turning_point)
         self.speed += self.acc * frame_time
         displacement = self.speed * frame_time
         angle = displacement / radius
@@ -182,16 +174,16 @@ class Car():
         self.points_mat += self.turning_point
 
         #Update position based on average points
-        self.pos = np.average(self.points_mat, 1)
+        self.__pos = np.average(self.points_mat, 1)
 
         #Recalculate wheel positions
         self.wheel_pos = np.matmul(translation_mat, self.wheel_pos)
         
         #Apply new wheel_positions
-        self.wheels[0].set_pos([self.wheel_pos.item((0,0)) + self.pos.item(0), self.wheel_pos.item((1,0)) + self.pos.item(1)])
-        self.wheels[1].set_pos([self.wheel_pos.item((0,1)) + self.pos.item(0), self.wheel_pos.item((1,1)) + self.pos.item(1)])
-        self.wheels[2].set_pos([self.wheel_pos.item((0,2)) + self.pos.item(0), self.wheel_pos.item((1,2)) + self.pos.item(1)])
-        self.wheels[3].set_pos([self.wheel_pos.item((0,3)) + self.pos.item(0), self.wheel_pos.item((1,3)) + self.pos.item(1)])
+        self.wheels[0].set_pos([self.wheel_pos.item((0,0)) + self.__pos.item(0), self.wheel_pos.item((1,0)) + self.__pos.item(1)])
+        self.wheels[1].set_pos([self.wheel_pos.item((0,1)) + self.__pos.item(0), self.wheel_pos.item((1,1)) + self.__pos.item(1)])
+        self.wheels[2].set_pos([self.wheel_pos.item((0,2)) + self.__pos.item(0), self.wheel_pos.item((1,2)) + self.__pos.item(1)])
+        self.wheels[3].set_pos([self.wheel_pos.item((0,3)) + self.__pos.item(0), self.wheel_pos.item((1,3)) + self.__pos.item(1)])
 
         #Apply new wheel rotations
         self.wheels[0].set_ang(self.ang)
@@ -204,10 +196,8 @@ class Car():
             wheel.render()
 
         points = np.asarray(np.transpose(self.points_mat))
-        pygame.draw.polygon(self.window, self.colour, points)
+        pygame.draw.polygon(self.window, self.__colour, points)
 
-
-#----------------------------------------------------------------------------------------------------------------------------------
     def crash_check(self):
         if (self.window.get_at([int(self.points_mat.item((0,0))), int(self.points_mat.item((1,0)))])[0] == 0 or
             self.window.get_at([int(self.points_mat.item((0,1))), int(self.points_mat.item((1,1)))])[0] == 0 or
@@ -217,12 +207,11 @@ class Car():
         else:
             self.crashed = False
 
-
     def find_distances(self):
         self.distances = []
         for ray in range(np.shape(self.normals)[1]):
-            pos = self.iterate_distance(self.normals[:, [ray]], self.pos, const.COL["light_grey"][0], 20, 1)
-            self.distances.append(np.linalg.norm(self.pos - pos) / const.BASE_RES)
+            pos = self.iterate_distance(self.normals[:, [ray]], self.__pos, const.COL["light_grey"][0], 20, 1)
+            self.distances.append(np.linalg.norm(self.__pos - pos) / const.BASE_RES)
 
     #Recursive method for finding the distance from the car to a wall
     def iterate_distance(self, vector, start_pos, start_colour, incriment_length, direction):
@@ -244,46 +233,44 @@ class Car():
 
         else:
             return start_pos
-            
-#----------------------------------------------------------------------------------------------------------------------------------        
+                    
     def display_debug(self):
-        pygame.draw.line(self.window, const.COL["yellow"], self.pos + self.rear_axel + 10000 * self.rear_norm,
-                         self.pos + self.rear_axel - 10000 * self.rear_norm)
-        pygame.draw.line(self.window, const.COL["yellow"], self.pos + self.front_axel + 10000 * self.front_norm,
-                         self.pos + self.front_axel - 10000 * self.front_norm)
+        pygame.draw.line(self.window, const.COL["yellow"], self.__pos + self.rear_axel + 10000 * self.rear_norm,
+                         self.__pos + self.rear_axel - 10000 * self.rear_norm)
+        pygame.draw.line(self.window, const.COL["yellow"], self.__pos + self.front_axel + 10000 * self.front_norm,
+                         self.__pos + self.front_axel - 10000 * self.front_norm)
         pygame.draw.circle(self.window, const.COL["blue"], [int(self.turning_point[0]), int(self.turning_point[1])], 3)
         
-
     def find_progress(self):
-        self.progress = self.track.progress(self.pos)
+        self.progress = self.track.progress(self.__pos)
         
-
     def get_crashed(self):
         return self.crashed
     
-
     def set_ang(self, ang):
         self.ang = ang
         self.ang_mat = np.array([[np.cos(self.ang), -np.sin(self.ang)],
                                  [np.sin(self.ang), np.cos(self.ang)]])
 
-
     def get_points_mat(self):
         return self.points_mat
-
 
     def set_crashed(self, crashed):
         self.crashed = crashed
 
+    @property
+    def pos(self):
+        return self.__pos
 
-    def get_pos(self):
-        return self.pos
-
-
-    def get_progress(self):
+    @property
+    def progress(self):
         self.find_progress()
-        return self.progress
+        return self.__progress
 
+    @property
+    def colour(self):
+        return self.__colour
 
-    def set_colour(self, colour):
-        self.colour = colour
+    @colour.setter
+    def colour(self, colour):
+        self.__colour = colour

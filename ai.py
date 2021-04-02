@@ -4,6 +4,7 @@ import car_o
 import numpy as np
 import time
 
+
 class AI():
     def __init__(self, window, track, agents_num, ai_mode, target):
         self.window = window
@@ -21,16 +22,13 @@ class AI():
         with open("logs/average_progress", "w") as f:
             f.write("AVG_PROGRESS")
 
-
     def run(self, frame_time):
         for agent in self.agents:
             agent.run(frame_time)
 
-
     def render(self):
         for agent in self.agents:
             agent.render()
-
 
     def next_gen(self):
         self.agents = sorted(self.agents)
@@ -55,7 +53,6 @@ class AI():
                 self.agents[agent + (i*10)].mutate_weights()
                 self.agents[agent + (i*10)].reset()
 
-
     def gen_over(self):
         over = True
         for agent in self.agents:
@@ -63,7 +60,6 @@ class AI():
                 over = False
         return over
         
-
     def write_progress(self):
         average_progress = 0
         for agent in self.agents:
@@ -72,7 +68,6 @@ class AI():
         with open("logs/average_progress", "at") as f:
             f.write("\n")
             f.write(str(average_progress))
-
 
     def write_snapshot(self, gen):
         with open("logs\\{}".format(self.__init_time), "wt") as f:
@@ -97,6 +92,7 @@ class AI():
             if line % 3 == 0: all_biases.append(list(np.float_(file[line].split(', '))))
         return all_weights, all_biases
 
+
 class Agent():
     def __init__(self, window, track, shape, ai_mode, weights, biases, renderable=False):
         self.window = window
@@ -107,14 +103,11 @@ class Agent():
         if ai_mode == const.AI_MODE.START: self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
         elif ai_mode == const.AI_MODE.RESUME: self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
 
-
     def __le__(self, other):
         return self.get_progress() <= other.get_progress()
 
-    
     def __lt__(self, other):
         return self.get_progress() < other.get_progress()
-
 
     def run(self, frame_time):
         if not self.car.get_crashed():
@@ -126,47 +119,36 @@ class Agent():
             self.car.find_progress()
             self.car.crash_check()
 
-
     def render(self):
         if self.renderable:
             self.car.render()
 
-
     def reset(self, colour=const.COL["red"]):
         self.car = car_o.Car(self.window, self.track, 10, colour)
-
     
     def get_progress(self):
         return self.car.get_progress()
 
-
     def mutate_weights(self):
         self.neural_net.mutate_weights()
-
     
     def mutate_biases(self):
         self.neural_net.mutate_biases()
 
-
     def set_weights(self, weights):
         self.neural_net.set_weights(weights)
-
 
     def set_biases(self, biases):
         self.neural_net.set_biases(biases)
 
-
     def get_weights(self):
         return self.neural_net.get_weights()
-
 
     def get_biases(self):
         return self.neural_net.get_biases()
 
-
     def get_crashed(self):
         return self.car.get_crashed()
-
 
     def set_colour(self, colour):
         self.car.set_colour(colour)

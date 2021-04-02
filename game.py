@@ -21,8 +21,6 @@ def get_track_points(file, asp_ratio):
         track_points = np.concatenate((track_points, point), 1)
     return track_points
 
-
-#----------------------------------------------------------------------------------------------------------------------------------
 def race(window, clock, action, ai_mode, snapshot, mouse_used):
     paused = True
     display_debug = True
@@ -50,63 +48,54 @@ def race(window, clock, action, ai_mode, snapshot, mouse_used):
         if gen_time >= 30:
             simulating = False
 
-        #process inputs
+        # Parse and act on keyboard inputs
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_down = True
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 mouse_down = False
-           
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z:
                     if display_debug:
                         display_debug = False
                     else:
                         display_debug = True
-
                 if event.key == K_p:
                     if paused:
                         paused = False
                     else:
                         paused = True
-
                 if event.key == K_x:
                     simulating = False
-
                 if event.key == K_m:
-                    action = const.MODE.MAIN
-                
+                    action = const.MODE.MAIN                
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     quit()
  
-        #Track Processing
+        # Track Processing
         track.render()
 
-        #Car Processing
+        # Car Processing
         if simulating:
             if not paused:
                 race_ai.run(frame_time)
             if wait_time > 0.5:
                 race_ai.render()
-
             simulating = False
             if not race_ai.gen_over():
                 simulating = True
-            
         else:
             race_ai.write_progress()
             race_ai.write_snapshot(gen)
             race_ai.next_gen()
-
             gen += 1
             simulating = True
             gen_time = 0
             wait_time = 0
             paused = True
 
-
-        #Display debug info
+        # Display debug info
         if display_debug:
             pygame_ui.draw_text(window, "fps: {}".format(str(int(clock.get_fps()))),
                       [window.get_size()[0]/32, window.get_size()[1]/14], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
