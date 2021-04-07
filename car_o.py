@@ -227,10 +227,9 @@ class Car():
             self.distances.append(np.linalg.norm(self._pos - pos) / const.BASE_RES)
 
     #Recursive method for finding the distance from the car to a wall
-    def iterate_distance(self, vector, start_pos, start_colour, incriment_length, direction):
-
-        #Stopping condition is that the inctiment is less than 1 pixel
-        if incriment_length > 1:
+    def iterate_distance(self, vector, start_pos, start_colour, increment_length, direction):
+        #Stopping condition is when the increment is less than 1 pixel
+        if increment_length > 1:
             if start_pos.item(0) < self.window.get_size()[0] and start_pos.item(0) >= 0 and start_pos.item(1) < self.window.get_size()[1] and start_pos.item(1) >= 0: 
                 colour = self.window.get_at([int(start_pos.item(0)), int(start_pos.item(1))])[0]
             else:
@@ -238,11 +237,11 @@ class Car():
 
             if start_colour != colour:
                 direction *= -1
-                pos = start_pos + vector * incriment_length * direction
-                return self.iterate_distance(vector, pos, colour, incriment_length/2, direction)
+                pos = start_pos + vector * increment_length * direction
+                return self.iterate_distance(vector, pos, colour, increment_length/2, direction)
             else:            
-                pos = start_pos + vector * incriment_length * direction
-                return self.iterate_distance(vector, pos, colour, incriment_length, direction)
+                pos = start_pos + vector * increment_length * direction
+                return self.iterate_distance(vector, pos, colour, increment_length, direction)
 
         else:
             return start_pos
