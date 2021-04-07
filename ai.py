@@ -42,13 +42,13 @@ class AI():
             parents.append(self.agents[int(9*self.agents_num/10) + i])
             self.agents[int(9*self.agents_num/10) + i].reset(const.COL["green"])
 
-        start_ang = self.track.get_start_ang()
+        start_ang = self.track.start_ang
 
         #Replace least performing cars with children of parents and mutate
         for i in range(3):
             for agent in range(len(parents)):
-                self.agents[agent + (i*10)].set_biases(parents[agent].get_biases())
-                self.agents[agent + (i*10)].set_weights(parents[agent].get_weights())        
+                self.agents[agent + (i*10)].biases = parents[agent].biases
+                self.agents[agent + (i*10)].weights = parents[agent].weights     
                 self.agents[agent + (i*10)].mutate_biases()
                 self.agents[agent + (i*10)].mutate_weights()
                 self.agents[agent + (i*10)].reset()
@@ -56,14 +56,14 @@ class AI():
     def gen_over(self):
         over = True
         for agent in self.agents:
-            if not agent.get_crashed():
+            if not agent.crashed:
                 over = False
         return over
         
     def write_progress(self):
         average_progress = 0
         for agent in self.agents:
-            average_progress += agent.get_progress()
+            average_progress += agent.progress
         average_progress /= self.agents_num
         with open("logs/average_progress", "at") as f:
             f.write("\n")
@@ -74,8 +74,8 @@ class AI():
             f.write(str(gen) + '\n')
             for agent in range(self.agents_num):
                 f.write("NETWORK_{}\n".format(agent))
-                weights = self.agents[agent].get_weights()
-                biases = self.agents[agent].get_biases()
+                weights = self.agents[agent].weights
+                biases = self.agents[agent].biases
                 f.write(str(weights).replace('[', '').replace(']', ''))
                 f.write("\n")
                 f.write(str(biases).replace('[', '').replace(']', ''))
@@ -99,56 +99,66 @@ class Agent():
         self.track = track
         self.shape = shape
         self.renderable = renderable
-        self.car = car_o.Car(self.window, self.track, 10)
+        self._car = car_o.Car(self.window, self.track, 10)
         if ai_mode == const.AI_MODE.START: self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
         elif ai_mode == const.AI_MODE.RESUME: self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
 
     def __le__(self, other):
-        return self.get_progress() <= other.get_progress()
+        return self.progress <= other.progress
 
     def __lt__(self, other):
-        return self.get_progress() < other.get_progress()
+        return self.progress < other.progress
 
     def run(self, frame_time):
-        if not self.car.get_crashed():
-            self.car.find_distances()
-            inputs = self.car.network_inputs(frame_time)
+        if not self._car.crashed:
+            self._car.find_distances()
+            inputs = self._car.network_inputs(frame_time)
             outputs = self.neural_net.process(inputs)
-            self.car.network_outputs(outputs, frame_time)
-            self.car.dynamics(frame_time)
-            self.car.find_progress()
-            self.car.crash_check()
+            self._car.network_outputs(outputs, frame_time)
+            self._car.dynamics(frame_time)
+            self._car.crash_check()
 
     def render(self):
         if self.renderable:
-            self.car.render()
+            self._car.render()
 
     def reset(self, colour=const.COL["red"]):
-        self.car = car_o.Car(self.window, self.track, 10, colour)
-    
-    def get_progress(self):
-        return self.car.get_progress()
+        self._car = car_o.Car(self.window, self.track, 10, colour)
 
     def mutate_weights(self):
         self.neural_net.mutate_weights()
     
     def mutate_biases(self):
         self.neural_net.mutate_biases()
+    
+    @property
+    def progress(self):
+        return self._car.progress
 
-    def set_weights(self, weights):
-        self.neural_net.set_weights(weights)
+    @property
+    def weights(self):
+        return self.neural_net.weights
 
-    def set_biases(self, biases):
-        self.neural_net.set_biases(biases)
+    @weights.setter
+    def weights(self, weights):
+        self.neural_net.weights = weights
 
-    def get_weights(self):
-        return self.neural_net.get_weights()
+    @property
+    def biases(self):
+        return self.neural_net.biases
 
-    def get_biases(self):
-        return self.neural_net.get_biases()
+    @biases.setter
+    def biases(self, biases):
+        self.neural_net.biases = biases
 
-    def get_crashed(self):
-        return self.car.get_crashed()
+    @property
+    def crashed(self):
+        return self._car.crashed
 
-    def set_colour(self, colour):
-        self.car.set_colour(colour)
+    @property
+    def colour(self):
+        return self.colour 
+
+    @colour.setter
+    def colour(self, colour):
+        self._car.colour = colour

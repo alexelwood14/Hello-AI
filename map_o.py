@@ -91,4 +91,3 @@ class Map():
     @property
     def start(self):
         return self.__points[:,[0]]
-                
