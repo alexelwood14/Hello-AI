@@ -111,7 +111,7 @@ class Agent():
 
     def run(self, frame_time):
         if not self._car.crashed:
-            self._car.find_distances()
+            self._car._find_distances()
             inputs = self._car.network_inputs(frame_time)
             outputs = self.neural_net.process(inputs)
             self._car.network_outputs(outputs, frame_time)
@@ -153,7 +153,7 @@ class Agent():
 
     @property
     def crashed(self):
-        return self._car.crashed
+        return self._car._crashed
 
     @property
     def colour(self):

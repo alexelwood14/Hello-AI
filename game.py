@@ -82,9 +82,8 @@ def race(window, clock, action, ai_mode, snapshot, mouse_used):
                 race_ai.run(frame_time)
             if wait_time > 0.5:
                 race_ai.render()
-            simulating = False
-            if not race_ai.gen_over():
-                simulating = True
+            if race_ai.gen_over():
+                simulating = False
         else:
             race_ai.write_progress()
             race_ai.write_snapshot(gen)
