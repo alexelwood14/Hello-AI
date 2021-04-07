@@ -17,3 +17,4 @@ COL = {"white" : [255,255,255],
         "orange" : [255,102,0]}
 
 MODE = Enum('MODE', 'MAIN SETTINGS RACE NETWORK QUIT')
+AI_MODE = Enum('AI_MODE', 'START RESUME SHOWCASE')
