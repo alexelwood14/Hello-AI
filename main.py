@@ -24,7 +24,7 @@ class Hello_AI():
         self.buttons = init_objects(self.window)
         self.mode = const.MODE.RACE
 
-        self.runner = runner.Runner.instance()
+        self.runner = runner.Runner.instance(self.window, self.ai_mode, self.snapshot)
 
     def run(self):
         while True:
@@ -33,7 +33,7 @@ class Hello_AI():
             elif self.mode == const.MODE.SETTINGS:
                 self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
             elif self.mode == const.MODE.RACE:
-                self.mode, mouse_used = self.runner.run(self.window, self.clock, self.mode, self.ai_mode, self.snapshot, self.mouse_used)
+                self.mode, mouse_used = self.runner.run(self.clock)
             elif self.mode == const.MODE.QUIT:
                 pygame.quit()
                 quit()
