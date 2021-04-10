@@ -4,6 +4,7 @@ import numpy as np
 import pygame_ui
 import runner
 import enum
+import configparser
 from pygame.locals import *
 
 
@@ -40,24 +41,18 @@ class Hello_AI():
 
     @staticmethod
     def get_config():
-        resolution = []
-        with open("data\config", "r") as f:
-            resolution.append(int(f.readline()))
-            resolution.append(int(f.readline()))
+        config = configparser.ConfigParser()
+        config.read('./data/config.ini')
+        
+        resolution = [int(config['SCREEN']['width']), int(config['SCREEN']['height'])]
+        windowed = bool(config['SCREEN']['windowed'])
+        if type(windowed) is not bool: 
+            raise Exception('Invalid windowed type in config file')
 
-            windowed = f.readline().replace('\n', '')
-            if windowed == 'True': 
-                windowed = True
-            elif windowed == 'False': 
-                windowed = False
-            else: 
-                raise Exception('Invalid windowed type in config file')
-
-            ai_mode = const.AI_MODE[f.readline().replace('\n', '')]
-            snapshot = f.readline().replace('\n', '')
-
-        return resolution, windowed, ai_mode, snapshot                
-
+        ai_mode = const.AI_MODE[config['AI']['mode']]
+        snapshot = config['AI']['snapshot']
+        
+        return resolution, windowed, ai_mode, snapshot           
 
 def init_objects(window):
     # Initiate text buttons
