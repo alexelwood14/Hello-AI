@@ -22,18 +22,7 @@ class Runner():
             Runner()
         return Runner.__instance
     
-    def get_track_points(self, file, asp_ratio):
-        with open("data\\{}".format(file), "r") as f:
-            line = f.readline()
-            point = line.split()
-            track_points = asp_ratio * np.matrix([[int(point[0])],
-                                                [int(point[1])]])
-            for l in f:
-                point = l.split()
-                point = asp_ratio * np.matrix([[int(point[0])],
-                                            [int(point[1])]])
-                track_points = np.concatenate((track_points, point), 1)
-            return track_points
+    
 
     def run(self, window, clock, mode, ai_mode, snapshot, mouse_used):
         paused = True
@@ -43,9 +32,7 @@ class Runner():
         gen_time = 1
         agents_num = 100
 
-        asp_ratio = window.get_size()[1] / const.BASE_RES
-        track_points = self.get_track_points("track3", asp_ratio)
-        track = map_o.Map(window, const.COL["light_grey"], track_points, 100)
+        track = map_o.Map(window, "track3", const.COL["light_grey"], 100)
 
         race_ai = ai.AI(window, track, agents_num, ai_mode, snapshot)
         gen = race_ai.gen 
