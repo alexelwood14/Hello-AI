@@ -47,9 +47,9 @@ class Car():
     def __init__(self, window, track, size, colour=const.COL["red"]):
         self.window = window
         self.size = size
-        self.crashed = False
         self._progress = 0
         self.manual = False
+        self._crashed = False
         self.track = track
         self.colour = colour
 
@@ -215,22 +215,22 @@ class Car():
             self.window.get_at([int(self.points_mat.item((0,1))), int(self.points_mat.item((1,1)))])[0] == 0 or
             self.window.get_at([int(self.points_mat.item((0,2))), int(self.points_mat.item((1,2)))])[0] == 0 or
             self.window.get_at([int(self.points_mat.item((0,3))), int(self.points_mat.item((1,3)))])[0] == 0):
-            self.crashed = True
-        else:
             self._find_progress()
-            self.crashed = False
+            self._crashed = True
+        else:
+            self._crashed = False
 
-    def find_distances(self):
+    def _find_distances(self):
+        assert self.window.get_at([int(self.pos.item(0)), int(self.pos.item(1))])[0] != 0
         self.distances = []
         for ray in range(np.shape(self.normals)[1]):
-            pos = self.iterate_distance(self.normals[:, [ray]], self._pos, const.COL["light_grey"][0], 20, 1)
+            pos = self._iterate_distance(self.normals[:, [ray]], self._pos, const.COL["light_grey"][0], 20, 1)
             self.distances.append(np.linalg.norm(self._pos - pos) / const.BASE_RES)
 
     #Recursive method for finding the distance from the car to a wall
-    def iterate_distance(self, vector, start_pos, start_colour, incriment_length, direction):
-
-        #Stopping condition is that the inctiment is less than 1 pixel
-        if incriment_length > 1:
+    def _iterate_distance(self, vector, start_pos, start_colour, increment_length, direction):
+        #Stopping condition is when the increment is less than 1 pixel
+        if increment_length > 1:
             if start_pos.item(0) < self.window.get_size()[0] and start_pos.item(0) >= 0 and start_pos.item(1) < self.window.get_size()[1] and start_pos.item(1) >= 0: 
                 colour = self.window.get_at([int(start_pos.item(0)), int(start_pos.item(1))])[0]
             else:
@@ -238,16 +238,16 @@ class Car():
 
             if start_colour != colour:
                 direction *= -1
-                pos = start_pos + vector * incriment_length * direction
-                return self.iterate_distance(vector, pos, colour, incriment_length/2, direction)
+                pos = start_pos + vector * increment_length * direction
+                return self._iterate_distance(vector, pos, colour, increment_length/2, direction)
             else:            
-                pos = start_pos + vector * incriment_length * direction
-                return self.iterate_distance(vector, pos, colour, incriment_length, direction)
+                pos = start_pos + vector * increment_length * direction
+                return self._iterate_distance(vector, pos, colour, increment_length, direction)
 
         else:
             return start_pos
                     
-    def display_debug(self):
+    def _display_debug(self):
         pygame.draw.line(self.window, const.COL["yellow"], self._pos + self.rear_axel + 10000 * self.rear_norm,
                          self._pos + self.rear_axel - 10000 * self.rear_norm)
         pygame.draw.line(self.window, const.COL["yellow"], self._pos + self.front_axel + 10000 * self.front_norm,
@@ -279,3 +279,12 @@ class Car():
     @progress.setter
     def progress(self, progress):
         self._progress = progress
+
+    @property
+    def crashed(self):
+        self.crash_check()
+        return self._crashed
+
+    @crashed.setter
+    def crashed(self, crashed):
+        self._crashed = crashed

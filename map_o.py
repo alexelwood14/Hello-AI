@@ -1,15 +1,16 @@
 import pygame
+import const
 import numpy as np
 from pygame.locals import *
         
 
 class Map():
-    def __init__(self, window, colour, points, width):
+    def __init__(self, window, file, colour, width):
         self.window = window
         self.colour = colour
         self.width = width
 
-        self.__points = points
+        self.__points = self.import_track_points(window, file)
         self.__lines = self.__points[:, [1]] - self.__points[:, [0]]
 
         self.track_length = 0
@@ -36,6 +37,22 @@ class Map():
             for point in range(len(new_poly)):
                 new_poly[point] = [new_poly[point].item(0), new_poly[point].item(1)]
             self.poly_points.append(new_poly)
+
+    @staticmethod
+    def import_track_points(window, file):
+        asp_ratio = window.get_size()[1] / const.BASE_RES
+        with open("data\\{}".format(file), "r") as f:
+            line = f.readline()
+            point = line.split()
+            track_points = asp_ratio * np.matrix([[int(point[0])],
+                                                [int(point[1])]])
+            for l in f:
+                point = l.split()
+                point = asp_ratio * np.matrix([[int(point[0])],
+                                            [int(point[1])]])
+                track_points = np.concatenate((track_points, point), 1)
+        
+        return track_points
         
     def render(self):
         for point in range(np.shape(self.__points)[1]):

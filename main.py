@@ -2,8 +2,9 @@ import const
 import pygame
 import numpy as np
 import pygame_ui
-import game
+import runner
 import enum
+import configparser
 from pygame.locals import *
 
 
@@ -24,6 +25,8 @@ class Hello_AI():
         self.buttons = init_objects(self.window)
         self.mode = const.MODE.RACE
 
+        self.runner = runner.Runner.instance(self.window, self.ai_mode, self.snapshot)
+
     def run(self):
         while True:
             if self.mode == const.MODE.MAIN:
@@ -31,27 +34,25 @@ class Hello_AI():
             elif self.mode == const.MODE.SETTINGS:
                 self.mode, mouse_used, self.window, resolution = settings(self.window, self.resolution, self.mode, self.buttons, self.mouse_used)
             elif self.mode == const.MODE.RACE:
-                self.mode, mouse_used = game.race(self.window, self.clock, self.mode, self.ai_mode, self.snapshot, self.mouse_used)
+                self.mode, mouse_used = self.runner.run(self.clock)
             elif self.mode == const.MODE.QUIT:
                 pygame.quit()
                 quit()
 
     @staticmethod
     def get_config():
-        resolution = []
-        f = open("data\config", "r")
-        resolution.append(int(f.readline()))
-        resolution.append(int(f.readline()))
+        config = configparser.ConfigParser()
+        config.read('./data/config.ini')
+        
+        resolution = [int(config['SCREEN']['width']), int(config['SCREEN']['height'])]
+        windowed = bool(config['SCREEN']['windowed'])
+        if type(windowed) is not bool: 
+            raise Exception('Invalid windowed type in config file')
 
-        windowed = f.readline().replace('\n', '')
-        if windowed == 'True': windowed = True
-        elif windowed == 'False': windowed = False
-        else: raise Exception('Invalid windowed type in config file')
-
-        ai_mode = const.AI_MODE[f.readline().replace('\n', '')]
-        snapshot = f.readline().replace('\n', '')
-        return resolution, windowed, ai_mode, snapshot                
-
+        ai_mode = const.AI_MODE[config['AI']['mode']]
+        snapshot = config['AI']['snapshot']
+        
+        return resolution, windowed, ai_mode, snapshot           
 
 def init_objects(window):
     # Initiate text buttons

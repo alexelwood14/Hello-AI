@@ -31,6 +31,10 @@ class AI():
             agent.render()
 
     def next_gen(self):
+        self.gen += 1
+        self.write_progress()
+        self.write_snapshot()
+
         self.agents = sorted(self.agents)
 
         for i in range(self.agents_num):
@@ -69,9 +73,9 @@ class AI():
             f.write("\n")
             f.write(str(average_progress))
 
-    def write_snapshot(self, gen):
+    def write_snapshot(self):
         with open("logs\\{}".format(self.__init_time), "wt") as f:
-            f.write(str(gen) + '\n')
+            f.write(str(self.gen) + '\n')
             for agent in range(self.agents_num):
                 f.write("NETWORK_{}\n".format(agent))
                 weights = self.agents[agent].weights
@@ -111,7 +115,7 @@ class Agent():
 
     def run(self, frame_time):
         if not self._car.crashed:
-            self._car.find_distances()
+            self._car._find_distances()
             inputs = self._car.network_inputs(frame_time)
             outputs = self.neural_net.process(inputs)
             self._car.network_outputs(outputs, frame_time)
@@ -153,7 +157,7 @@ class Agent():
 
     @property
     def crashed(self):
-        return self._car.crashed
+        return self._car._crashed
 
     @property
     def colour(self):
