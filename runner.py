@@ -9,17 +9,17 @@ from pygame.locals import *
 class Runner():
     __instance = None
 
-    def __init__(self, window, ai_mode, snapshot):
+    def __init__(self, window, ai_config):
         self.window = window
         self.running = True
         self.paused = False
         self.display_debug = True
         self.gen_over = False
         self.gen_time = 0
-        self.track = map_o.Map(window, "track3", const.COL["light_grey"], 100)
+        self.track = map_o.Map(window, 'track{}'.format(ai_config['track']), const.COL['light_grey'], 100)
 
         agents_num = 100
-        self.race_ai = ai.AI(window, self.track, agents_num, ai_mode, snapshot)
+        self.race_ai = ai.AI(window, self.track, ai_config)
         
         if Runner.__instance is None:
             Runner.__instance = self
@@ -27,9 +27,9 @@ class Runner():
             raise Exception('Singleton instance already exists')
 
     @staticmethod
-    def instance(window, ai_mode, snapshot):
+    def instance(window, ai_config):
         if not Runner.__instance:
-            Runner(window, ai_mode, snapshot)
+            Runner(window, ai_config)
         return Runner.__instance
 
     @staticmethod

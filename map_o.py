@@ -41,7 +41,7 @@ class Map():
     @staticmethod
     def import_track_points(window, file):
         asp_ratio = window.get_size()[1] / const.BASE_RES
-        with open("data\\{}".format(file), "r") as f:
+        with open("./data/{}".format(file), "r") as f:
             line = f.readline()
             point = line.split()
             track_points = asp_ratio * np.matrix([[int(point[0])],

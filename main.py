@@ -11,7 +11,7 @@ from pygame.locals import *
 class Hello_AI():
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.resolution, self.windowed, self.ai_mode, self.snapshot = self.get_config()
+        self.resolution, self.windowed, ai_config = self.get_config()
         pygame.init()
 
         if self.windowed:
@@ -25,7 +25,7 @@ class Hello_AI():
         self.buttons = init_objects(self.window)
         self.mode = const.MODE.RACE
 
-        self.runner = runner.Runner.instance(self.window, self.ai_mode, self.snapshot)
+        self.runner = runner.Runner.instance(self.window, ai_config)
 
     def run(self):
         while True:
@@ -49,10 +49,9 @@ class Hello_AI():
         if type(windowed) is not bool: 
             raise Exception('Invalid windowed type in config file')
 
-        ai_mode = const.AI_MODE[config['AI']['mode']]
-        snapshot = config['AI']['snapshot']
+        ai_config = config['AI']
         
-        return resolution, windowed, ai_mode, snapshot           
+        return resolution, windowed, ai_config
 
 def init_objects(window):
     # Initiate text buttons

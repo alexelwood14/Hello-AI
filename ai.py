@@ -6,17 +6,20 @@ import time
 
 
 class AI():
-    def __init__(self, window, track, agents_num, ai_mode, target):
+    def __init__(self, window, track, ai_config):
         self.window = window
-        self.agents_num = agents_num
-        self.shape = [9, 10, 4]
+        self.agents_num = int(ai_config['number'])
+        self.shape = [int(ai_config['inputs'])]
+        self.shape.extend(int(i) for i in ai_config['hidden'].split(',')) 
+        self.shape.append(int(ai_config['outputs']))
         self.track = track
+        self.ai_mode = const.AI_MODE[ai_config['mode']]
         self.gen = 0
-        if ai_mode != const.AI_MODE.START: 
-            weights, biases = self.parse_snapshot(target)
-            self.agents = [Agent(self.window, self.track, self.shape, ai_mode, weights[i], biases[i], True) for i in range(agents_num)]
+        if ai_config['mode'] != const.AI_MODE.START: 
+            weights, biases = self.parse_snapshot(ai_config['snapshot'])
+            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, weights[i], biases[i], True) for i in range(self.agents_num)]
         else:
-            self.agents = [Agent(self.window, self.track, self.shape, ai_mode, None, None, True) for i in range(agents_num)]
+            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, None, None, True) for i in range(agents_num)]
         self.__init_time = name = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
 
         with open("logs/average_progress", "w") as f:
@@ -104,8 +107,10 @@ class Agent():
         self.shape = shape
         self.renderable = renderable
         self._car = car_o.Car(self.window, self.track, 10)
-        if ai_mode == const.AI_MODE.START: self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
-        elif ai_mode == const.AI_MODE.RESUME: self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
+        if ai_mode == const.AI_MODE.START:
+            self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
+        elif ai_mode == const.AI_MODE.RESUME: 
+            self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
 
     def __le__(self, other):
         return self.progress <= other.progress
