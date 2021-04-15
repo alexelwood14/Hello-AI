@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 
-class AI():
+class AI:
     def __init__(self, window, track, ai_config):
         self.window = window
         self.agents_num = int(ai_config['number'])
@@ -17,10 +17,12 @@ class AI():
         self.gen = 0
         if ai_config['mode'] != const.AI_MODE.START: 
             weights, biases = self.parse_snapshot(ai_config['snapshot'])
-            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, weights[i], biases[i], True) for i in range(self.agents_num)]
+            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, weights[i], biases[i], True)
+                           for i in range(self.agents_num)]
         else:
-            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, None, None, True) for i in range(agents_num)]
-        self.__init_time = name = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
+            self.agents = [Agent(self.window, self.track, self.shape, self.ai_mode, None, None, True)
+                           for i in range(self.agents_num)]
+        self.__init_time = time.ctime(time.time()).replace(' ', '-').replace(':', '-')
 
         with open("logs/average_progress", "w") as f:
             f.write("AVG_PROGRESS")
@@ -43,7 +45,7 @@ class AI():
         for i in range(self.agents_num):
             self.agents[i].reset(const.COL["blue"])  
 
-        #Create an array of parents
+        # Create an array of parents
         parents = []
         for i in range(int(self.agents_num/10)):
             parents.append(self.agents[int(9*self.agents_num/10) + i])
@@ -51,7 +53,7 @@ class AI():
 
         start_ang = self.track.start_ang
 
-        #Replace least performing cars with children of parents and mutate
+        # Replace least performing cars with children of parents and mutate
         for i in range(3):
             for agent in range(len(parents)):
                 self.agents[agent + (i*10)].biases = parents[agent].biases
@@ -95,12 +97,14 @@ class AI():
             file = [f.readline().replace('\n', '') for i in range(self.agents_num * 3+1)]
             self.gen = int(file[0])
         for line in range(1, len(file)):
-            if (line - 2) % 3 == 0: all_weights.append(list(np.float_(file[line].split(', '))))
-            if line % 3 == 0: all_biases.append(list(np.float_(file[line].split(', '))))
+            if (line - 2) % 3 == 0:
+                all_weights.append(list(np.float_(file[line].split(', '))))
+            if line % 3 == 0:
+                all_biases.append(list(np.float_(file[line].split(', '))))
         return all_weights, all_biases
 
 
-class Agent():
+class Agent:
     def __init__(self, window, track, shape, ai_mode, weights, biases, renderable=False):
         self.window = window
         self.track = track
@@ -121,7 +125,7 @@ class Agent():
     def run(self, frame_time):
         if not self._car.crashed:
             self._car._find_distances()
-            inputs = self._car.network_inputs(frame_time)
+            inputs = self._car.network_inputs()
             outputs = self.neural_net.process(inputs)
             self._car.network_outputs(outputs, frame_time)
             self._car.dynamics(frame_time)

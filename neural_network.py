@@ -1,9 +1,8 @@
-import const
 import copy
 import numpy as np
 
 
-class Neural_Network():
+class Neural_Network:
     def __init__(self, window, shape):
         self.window = window
         self._weights = []
@@ -83,18 +82,21 @@ class Unevolved_Neural_Network(Neural_Network):
     def __init__(self, window, shape):
         super().__init__(window, shape)
 
-        #Initiate weights and biases for the first hidden layer
+        # Initiate weights and biases for the first hidden layer
         self._biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[0])])
-        self._weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.inputs)] for j in range(self.hidden[0])])
+        self._weights.append([[np.random.normal(self.mean, self.std_dev)
+                               for i in range(self.inputs)] for j in range(self.hidden[0])])
         
-        #Initiate weights and biases for subsequent hidden layers
+        # Initiate weights and biases for subsequent hidden layers
         for layer in range(1, len(self.hidden)):
             self._biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[layer])])
-            self._weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[layer-1])] for j in range(self.hidden[layer])])
+            self._weights.append([[np.random.normal(self.mean, self.std_dev)
+                                   for i in range(self.hidden[layer-1])] for j in range(self.hidden[layer])])
 
-        #Initiate weights and biases for the output layer
+        # Initiate weights and biases for the output layer
         self._biases.append([np.random.normal(self.mean, self.std_dev) for i in range(self.outputs)])
-        self._weights.append([[np.random.normal(self.mean, self.std_dev) for i in range(self.hidden[-1])] for j in range(self.outputs)])
+        self._weights.append([[np.random.normal(self.mean, self.std_dev)
+                               for i in range(self.hidden[-1])] for j in range(self.outputs)])
 
 
 class Evolved_Neural_Network(Neural_Network):

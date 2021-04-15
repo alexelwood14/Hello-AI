@@ -6,7 +6,8 @@ import map_o
 import pygame_ui
 from pygame.locals import *
 
-class Runner():
+
+class Runner:
     __instance = None
 
     def __init__(self, window, ai_config):
@@ -18,9 +19,8 @@ class Runner():
         self.gen_time = 0
         self.track = map_o.Map(window, 'track{}'.format(ai_config['track']), const.COL['light_grey'], 100)
 
-        agents_num = 100
         self.race_ai = ai.AI(window, self.track, ai_config)
-        
+
         if Runner.__instance is None:
             Runner.__instance = self
         else:
@@ -35,9 +35,11 @@ class Runner():
     @staticmethod
     def debug(window, clock, gen):
         pygame_ui.draw_text(window, "fps: {}".format(str(int(clock.get_fps()))),
-                [window.get_size()[0]/32, window.get_size()[1]/14], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
+                            [window.get_size()[0] / 32, window.get_size()[1] / 14], int(window.get_size()[0] / 72),
+                            const.COL["white"], "calibri", "ml")
         pygame_ui.draw_text(window, "generation {}".format(str(gen)),
-                [window.get_size()[0]/32, window.get_size()[1]/10], int(window.get_size()[0]/72), const.COL["white"], "calibri", "ml")
+                            [window.get_size()[0] / 32, window.get_size()[1] / 10], int(window.get_size()[0] / 72),
+                            const.COL["white"], "calibri", "ml")
 
     def parse_keyboard_input(self):
         for event in pygame.event.get():
@@ -55,7 +57,7 @@ class Runner():
                 if event.key == K_x:
                     self.gen_over = True
                 if event.key == K_m:
-                    self.running = False                
+                    self.running = False
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     quit()
@@ -72,7 +74,7 @@ class Runner():
 
             # Parse and act on keyboard inputs
             self.parse_keyboard_input()
-    
+
             self.track.render()
 
             # Call functions to control AI
@@ -83,9 +85,9 @@ class Runner():
             elif not self.paused:
                 self.race_ai.run(frame_time)
 
-            self.race_ai.render()                
+            self.race_ai.render()
 
-            # Display debug infomation
+            # Display debug information
             if self.display_debug:
                 self.debug(self.window, clock, self.race_ai.gen)
 
