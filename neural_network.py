@@ -2,7 +2,7 @@ import copy
 import numpy as np
 
 
-class Neural_Network:
+class NeuralNetwork:
     def __init__(self, window, shape):
         self.window = window
         self._weights = []
@@ -78,7 +78,7 @@ class Neural_Network:
         self._biases = copy.deepcopy(biases)
 
 
-class Unevolved_Neural_Network(Neural_Network):
+class UnevolvedNeuralNetwork(NeuralNetwork):
     def __init__(self, window, shape):
         super().__init__(window, shape)
 
@@ -99,7 +99,7 @@ class Unevolved_Neural_Network(Neural_Network):
                                for i in range(self.hidden[-1])] for j in range(self.outputs)])
 
 
-class Evolved_Neural_Network(Neural_Network):
+class EvolvedNeuralNetwork(NeuralNetwork):
     def __init__(self, window, shape, weights, biases):
         super().__init__(window, shape)
         assert len(biases) == sum(shape[1:])

@@ -112,9 +112,9 @@ class Agent:
         self.renderable = renderable
         self._car = car_o.Car(self.window, self.track, 10)
         if ai_mode == const.AI_MODE.START:
-            self.neural_net = neural_network.Unevolved_Neural_Network(self.window, self.shape)
+            self.neural_net = neural_network.UnevolvedNeuralNetwork(self.window, self.shape)
         elif ai_mode == const.AI_MODE.RESUME: 
-            self.neural_net = neural_network.Evolved_Neural_Network(self.window, self.shape, weights, biases)
+            self.neural_net = neural_network.EvolvedNeuralNetwork(self.window, self.shape, weights, biases)
 
     def __le__(self, other):
         return self.progress <= other.progress
@@ -124,7 +124,7 @@ class Agent:
 
     def run(self, frame_time):
         if not self._car.crashed:
-            self._car._find_distances()
+            self._car.find_distances()
             inputs = self._car.network_inputs()
             outputs = self.neural_net.process(inputs)
             self._car.network_outputs(outputs, frame_time)

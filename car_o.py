@@ -147,7 +147,6 @@ class Car:
 
     def dynamics(self, frame_time):
         # Recalculate wheel positions
-        # wheel_pos = self.wheel_pos
 
         # Find axel pivot points
         self.front_axel = self.wheel_pos[:, [4]]
@@ -231,7 +230,7 @@ class Car:
         else:
             self._crashed = False
 
-    def _find_distances(self):
+    def find_distances(self):
         assert self.window.get_at([int(self.pos.item(0)), int(self.pos.item(1))])[0] != 0
         self.distances = []
         for ray in range(np.shape(self.normals)[1]):
